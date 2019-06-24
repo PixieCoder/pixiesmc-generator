@@ -1,5 +1,29 @@
+import { template } from 'lodash';
 import { getData } from './data';
+import fs from 'fs';
 
 export default function generate() {
-  console.log(getData('org'));
+  const orgData = getData("org");
+  let headerTemplate = template(fs.readFileSync('./templates/default/header.tpl.html', 'utf8'));
+  const headerOutput = headerTemplate({logo: orgData.header[0].logo});
+  console.log(headerOutput);
+
+  let footerTemplate = template(fs.readFileSync('./templates/default/footer.tpl.html', 'utf8'));
+  const footerOutput = footerTemplate({contact: orgData.footer[0].contact});
+  console.log(footerOutput);
+
+  let pageTemplate = template(fs.readFileSync('./templates/default/page.tpl.html', 'utf8'));
+  const pageOutput = pageTemplate({
+    title: "test",
+    sections: [],
+    header: {
+      html: headerOutput
+    },
+    footer: {
+      html: footerOutput
+    },
+  });
+  console.log(pageOutput);
 }
+
+
