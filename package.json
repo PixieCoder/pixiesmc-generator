@@ -1,0 +1,19 @@
+{
+  "name": "pixiesmc-generator",
+  "version": "0.0.1",
+  "description": "Static site generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PixieCoder/pixiesmc-generator.git"
+  },
+  "author": "Filip Joelsson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PixieCoder/pixiesmc-generator/issues"
+  },
+  "homepage": "https://github.com/PixieCoder/pixiesmc-generator#readme"
+}
