@@ -16,11 +16,11 @@ export default function generate() {
   let sectionTemplate = template(fs.readFileSync('./templates/default/section.tpl.html', 'utf8'));
   const sectionOutput = []
   sectionOutput.push(sectionTemplate({
-  title: sectionsData.section[0].title,
-  text: sectionsData.section[0].text,
-  file: sectionsData.section[0].file,
-  caption: sectionsData.section[0].caption,
-  description: sectionsData.section[0].description}));
+  title: sectionsData.sections[0].title,
+  text: sectionsData.sections[0].text,
+  file: sectionsData.sections[0].file,
+  caption: sectionsData.sections[0].caption,
+  description: sectionsData.sections[0].description}));
   console.log(sectionOutput);
 
   let pageTemplate = template(fs.readFileSync('./templates/default/page.tpl.html', 'utf8'));
@@ -35,7 +35,7 @@ export default function generate() {
     },
   });
   console.log(pageOutput);
-  fs.writeFileSync('./distfolder/pageOutput.json', JSON.stringify(pageOutput));
+  fs.writeFileSync('./distfolder/pageOutput.txt',pageOutput);
 }
 
 
