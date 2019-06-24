@@ -1,0 +1,30 @@
+{
+  "data": {
+    "pages": [
+      {
+        "title": "First page",
+        "link": "<front>",
+        "preamble": "<p>A bit of a preamble here</p>",
+        "sections": [0, 1],
+        "conclusion": "<p>Conclusion</p>"
+      },
+      {
+        "title": "Second page",
+        "link": "second",
+        "preamble": "<p>Another preambel</p>",
+        "sections": [2, 0],
+        "conclusion": "<p>Another conclusion</p>"
+      },
+      {
+        "title": "Page with no preamble",
+        "link": "third",
+        "sections": [3, 4, 5],
+        "image": {
+          "file": "image3.jpg",
+          "caption": "image 3",
+          "description": "A third example image"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "pixiesmc-generator",
+  "version": "0.0.1",
+  "description": "Static site generator",
+  "main": "index.js",
+  "scripts": {
+    "start": "node_modules/.bin/babel-node index.js",
+    "lint": "./node_modules/.bin/eslint",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PixieCoder/pixiesmc-generator.git"
+  },
+  "author": "Filip Joelsson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PixieCoder/pixiesmc-generator/issues"
+  },
+  "homepage": "https://github.com/PixieCoder/pixiesmc-generator#readme",
+  "dependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/node": "^7.4.5",
+    "@babel/plugin-syntax-object-rest-spread": "^7.2.0",
+    "@babel/preset-env": "^7.4.5",
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "eslint": "^6.0.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.17.3"
+  }
+}

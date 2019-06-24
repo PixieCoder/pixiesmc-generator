@@ -1,0 +1,16 @@
+{
+    "data": {
+        "name": "acme",
+        "title": "Acme inc",
+        "header": [{
+            "logo": "./assets/logo.png",
+            "color": "black",
+            "text": "Acme inc"
+        }],
+        "footer": [{
+            "contact": "info@acme.org",
+            "color": "red"
+        }]
+    }
+}
+
