@@ -1,1 +1,3 @@
-console.log('Implement me');
+import generate from './app/generate';
+
+generate();

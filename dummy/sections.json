@@ -1,0 +1,60 @@
+{
+    "data": {
+        "sections": [
+            {
+                "title": "Section 1",
+                "text": "<p>Testtext testtext testtext</p>",
+                "image": {
+                    "file": "image1.jpg",
+                    "caption": "image 1",
+                    "description": "An example image"
+                }
+            },
+            {
+                "title": "Section 2",
+                "text": "<p>Testtext testtext \"testtext\"</p>",
+                "image": {
+                    "file": "image2.jpg",
+                    "caption": "image 2",
+                    "description": "A second example image"
+                }
+            },
+            {
+                "title": "Section 3",
+                "text": "<p>Testtext 3 testtext testtext</p>",
+                "image": {
+                    "file": "image1.jpg",
+                    "caption": "image 1",
+                    "description": "An example image"
+                }
+            },
+            {
+                "title": "Section 4",
+                "text": "<p>Testtext testtext 4 \"testtext\"</p>",
+                "image": {
+                    "file": "image2.jpg",
+                    "caption": "image 2",
+                    "description": "A second example image"
+                }
+            },
+            {
+                "title": "Section 5",
+                "text": "<p>Testtext 5 testtext testtext</p>",
+                "image": {
+                    "file": "image1.jpg",
+                    "caption": "image 1",
+                    "description": "An example image"
+                }
+            },
+            {
+                "title": "Section 6",
+                "text": "<p>Testtext 6 testtext \"testtext\"</p>",
+                "image": {
+                    "file": "image2.jpg",
+                    "caption": "image 2",
+                    "description": "A second example image"
+                }
+            }
+        ]
+    }
+}
