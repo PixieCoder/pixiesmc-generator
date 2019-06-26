@@ -9,13 +9,16 @@
         <main>
             <section class="preamble">
                 <!-- TODO: Add page preamble here - and image -->
+                <!--%= preamble.html %-->
             </section>
-            <% _.forEach(sections, (section) => { %>
-                <%= section.html %>
+            <% _.forEach(sectionsHtml, (section) => { %>
+                <%= section %>
             <% }); %>
             <section class="conclusion">
                 <!-- TODO: Add page conclusion here -->
+                <!--%= conclusion.html %-->
             </section>
+            <!--%= imageHtml    potential third image? %-->
         </main>
         <%= footer.html %>
     </body>

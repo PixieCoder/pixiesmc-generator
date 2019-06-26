@@ -1,8 +1,10 @@
 <section>
-    <div><h2>Section 1</h2><p>Testtext testtext testtext</p>
+    <div><h2>Section 1</h2>
+        <p>Testtext testtext testtext</p>
     </div>
-    <div><img src=>
-        <span>
-        </span>
-    </div>
+    <div><img src=image1.jpg>
+    <span>image 1
+        An example image
+    </span>
+</div>
 </section>
