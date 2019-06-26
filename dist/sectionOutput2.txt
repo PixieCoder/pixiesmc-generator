@@ -1,0 +1,10 @@
+<section>
+    <div><h2>Section 3</h2>
+        <p>Testtext 3 testtext testtext</p>
+    </div>
+    <div><img src=image1.jpg>
+    <span>image 1
+        An example image
+    </span>
+</div>
+</section>
