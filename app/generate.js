@@ -33,36 +33,15 @@ function generateSections(theme, sections) {
 
 }
 
-export default function generate() {
-  const orgData = getData("org");
-  const pageData = getData("pages");
-  const sectionsData = getData("sections");
-  const headerTemplate = template(fs.readFileSync('./templates/default/header.tpl.html', 'utf8'));
-  const imageTemplate = template(fs.readFileSync('./templates/default/image.tpl.html', 'utf8'));
-  const footerTemplate = template(fs.readFileSync('./templates/default/footer.tpl.html', 'utf8'));
-  
-  
-  orgData.header[0].html = headerTemplate({logo: orgData.header[0].logo});
-    //Puts the header from org through the headerTemplate and saves it in headerOuput.
-  
-  orgData.footer[0].html = footerTemplate({contact: orgData.footer[0].contact});
-    //Does the same thing with header, but with footer.
-
-  createDistFolder(orgData.name)
-    //Makes a folder for the organization which we're going to save a file for.
-    //Is supposed to delete the file if it already exists.
-
-  const sectionOutput = generateSections(orgData.theme, sectionsData.sections);
-
+function generatePage(pages, header, footer, name, sectionOutput) {
+  let pageOutput = [];
   const preambleTemplate = template(fs.readFileSync('./templates/default/preamble.tpl.html', 'utf8'));
   const conclusionTemplate = template(fs.readFileSync('./templates/default/conclusion.tpl.html', 'utf8'));
-  let pageTemplate = template(fs.readFileSync('./templates/default/page.tpl.html', 'utf8'));
-  //Put in page function  
+  const pageTemplate = template(fs.readFileSync('./templates/default/page.tpl.html', 'utf8'));
+  const imageTemplate = template(fs.readFileSync('./templates/default/image.tpl.html', 'utf8'));
   
-  const pageOutput = [];
-
-  for (let i = 0; i < pageData.pages.length; i++) {
-    let page = pageData.pages[i];
+  for (let i = 0; i < pages.length; i++) {
+    let page = pages[i];
 
     if (page.image) {
       page.imageHtml = imageTemplate(page.image);
@@ -82,8 +61,8 @@ export default function generate() {
       page.conclusionHtml = ""
     }
 
-    page.header = orgData.header[0];
-    page.footer = orgData.footer[0];
+    page.header = header[0];
+    page.footer = footer[0];
     
     page.sectionsHtml = [];
     for (let i = 0; i < page.sections.length; i++) {
@@ -92,10 +71,41 @@ export default function generate() {
 
     pageOutput.push(pageTemplate( page ));
 
-    fs.writeFileSync('./dist/' + page.link + '.html', pageOutput[i]);
+    fs.writeFileSync('./dist/' + name + '/' + page.link + '.html', pageOutput[i]);
 
   }
     //Writes out the html file and then saves it to a txt.
+
+}
+
+export default function generate() {
+  const orgData = getData("org");
+  const pageData = getData("pages");
+  const sectionsData = getData("sections");
+  const headerTemplate = template(fs.readFileSync('./templates/default/header.tpl.html', 'utf8'));
+  const footerTemplate = template(fs.readFileSync('./templates/default/footer.tpl.html', 'utf8'));
+  
+  
+  orgData.header[0].html = headerTemplate({logo: orgData.header[0].logo});
+    //Puts the header from org through the headerTemplate and saves it in headerOuput.
+  
+  orgData.footer[0].html = footerTemplate({contact: orgData.footer[0].contact});
+    //Does the same thing with header, but with footer.
+
+  createDistFolder(orgData.name)
+    //Makes a folder for the organization which we're going to save a file for.
+    //Is supposed to delete the file if it already exists.
+
+  const sectionOutput = generateSections(orgData.theme, sectionsData.sections);
+
+  generatePage(pageData.pages,
+    orgData.footer,
+    orgData.header,
+    orgData.name,
+    sectionOutput, );
+
+
+  
 
 
 
