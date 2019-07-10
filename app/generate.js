@@ -31,8 +31,8 @@ function generateSections(theme, sections) {
   return retArray;
 }
 
-function generatePage(pages, header, footer, name, sectionOutput) {
-  let pageOutput = [];
+function generatePages(pages, header, footer, sectionOutput) {
+  let retArray = [];
   const preambleTemplate = template(fs.readFileSync('./templates/default/preamble.tpl.html', 'utf8'));
   const conclusionTemplate = template(fs.readFileSync('./templates/default/conclusion.tpl.html', 'utf8'));
   const pageTemplate = template(fs.readFileSync('./templates/default/page.tpl.html', 'utf8'));
@@ -67,10 +67,18 @@ function generatePage(pages, header, footer, name, sectionOutput) {
       page.sectionsHtml.push(sectionOutput[page.sections[i]]);
     }
 
-    pageOutput.push(pageTemplate( page ));
-    fs.writeFileSync('./dist/' + name + '/' + page.link + '.html', pageOutput[i]);
+    retArray.push({link: page.link, output: pageTemplate( page )});
+    //fs.writeFileSync('./dist/' + name + '/' + page.link + '.html', pageOutput[i]);
   }
   //Writes out the html file and then saves it to a txt.
+  return retArray;
+}
+
+function writePages(name, pageOutput) {
+  for (let i = 0; i < pageOutput.length; i++){
+    fs.writeFileSync('./dist/' + name + '/' + pageOutput[i].link + '.html', pageOutput[i].output);
+  }
+
 }
 
 export default function generate() {
@@ -90,9 +98,10 @@ export default function generate() {
 
   const sectionOutput = generateSections(orgData.theme, sectionsData.sections);
 
-  generatePage(pageData.pages,
+  const pageOutput = generatePages(pageData.pages,
     orgData.footer,
     orgData.header,
-    orgData.name,
     sectionOutput, );
+
+  writePages(orgData.name, pageOutput);
 }
