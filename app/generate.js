@@ -68,7 +68,6 @@ function generatePages(pages, header, footer, sectionOutput) {
     }
 
     retArray.push({link: page.link, output: pageTemplate( page )});
-    //fs.writeFileSync('./dist/' + name + '/' + page.link + '.html', pageOutput[i]);
   }
   //Writes out the html file and then saves it to a txt.
   return retArray;
