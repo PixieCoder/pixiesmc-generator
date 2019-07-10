@@ -29,9 +29,6 @@ function generateSections(theme, sections) {
     //Puts all the information in an array and saves it in sectionOutput'i'.
   }
   return retArray;
-
-    
-
 }
 
 function generatePage(pages, header, footer, name, sectionOutput) {
