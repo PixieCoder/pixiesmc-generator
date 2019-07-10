@@ -25,11 +25,12 @@ function generateSections(theme, sections) {
       section.imageHtml = "";
     }
     retArray.push(sectionTemplate(section));
-  }
-
-  return retArray;
-    //Does the same thing with header and footer, but with sections.
+    //Does the same thing with header and footer templates, but with sections.
     //Puts all the information in an array and saves it in sectionOutput'i'.
+  }
+  return retArray;
+
+    
 
 }
 
@@ -70,12 +71,9 @@ function generatePage(pages, header, footer, name, sectionOutput) {
     }
 
     pageOutput.push(pageTemplate( page ));
-
     fs.writeFileSync('./dist/' + name + '/' + page.link + '.html', pageOutput[i]);
-
   }
-    //Writes out the html file and then saves it to a txt.
-
+  //Writes out the html file and then saves it to a txt.
 }
 
 export default function generate() {
@@ -85,16 +83,13 @@ export default function generate() {
   const headerTemplate = template(fs.readFileSync('./templates/default/header.tpl.html', 'utf8'));
   const footerTemplate = template(fs.readFileSync('./templates/default/footer.tpl.html', 'utf8'));
   
-  
   orgData.header[0].html = headerTemplate({logo: orgData.header[0].logo});
-    //Puts the header from org through the headerTemplate and saves it in headerOuput.
-  
+  //Puts the header from org through the headerTemplate and saves it in headerOuput.
   orgData.footer[0].html = footerTemplate({contact: orgData.footer[0].contact});
-    //Does the same thing with header, but with footer.
-
+  //Does the same thing with header, but with footer.
   createDistFolder(orgData.name)
-    //Makes a folder for the organization which we're going to save a file for.
-    //Is supposed to delete the file if it already exists.
+  //Makes a folder for the organization which we're going to save a file for.
+  //Is supposed to delete the file if it already exists.
 
   const sectionOutput = generateSections(orgData.theme, sectionsData.sections);
 
@@ -103,13 +98,4 @@ export default function generate() {
     orgData.header,
     orgData.name,
     sectionOutput, );
-
-
-  
-
-
-
-
 }
-
-
