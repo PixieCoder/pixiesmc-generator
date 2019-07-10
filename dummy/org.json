@@ -2,6 +2,7 @@
     "data": {
         "name": "acme",
         "title": "Acme inc",
+        "theme": "default",
         "header": [{
             "logo": "./assets/logo.png",
             "color": "black",

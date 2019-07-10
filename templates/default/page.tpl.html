@@ -7,15 +7,18 @@
     <body>
         <%= header.html %>
         <main>
-            <section class="preamble">
-                <!-- TODO: Add page preamble here - and image -->
+            <section class="intro">
+                    <h1><%= title %></h1>
+                        <%= imageHtml %>
             </section>
-            <% _.forEach(sections, (section) => { %>
-                <%= section.html %>
+            <%= preambleHtml %>
+            
+            <% _.forEach(sectionsHtml, (section) => { %>
+                <%= section %>
             <% }); %>
-            <section class="conclusion">
-                <!-- TODO: Add page conclusion here -->
-            </section>
+            
+            <%= conclusionHtml %>
+            
         </main>
         <%= footer.html %>
     </body>

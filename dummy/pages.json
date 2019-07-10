@@ -3,7 +3,7 @@
     "pages": [
       {
         "title": "First page",
-        "link": "<front>",
+        "link": "index",
         "preamble": "<p>A bit of a preamble here</p>",
         "sections": [0, 1],
         "conclusion": "<p>Conclusion</p>"

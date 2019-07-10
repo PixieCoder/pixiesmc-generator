@@ -1,6 +1,6 @@
 import org from '../dummy/org';
 import pages from '../dummy/pages';
-//import sections from '../dummy/sections';
+import sections from '../dummy/sections';
 
 export function getData(dataName) {
   switch (dataName) {
