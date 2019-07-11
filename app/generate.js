@@ -1,5 +1,5 @@
 import { template } from 'lodash';
-import { getData } from './data';
+import { getData, getGraphData } from './data';
 import fs from 'fs';
 import { deleteFolderRecursive } from "./utils";
 
@@ -80,7 +80,10 @@ function writePages(name, pageOutput) {
 
 }
 
-export default function generate() {
+export default async function generate() {
+  
+  await getGraphData();
+  
   const orgData = getData("org");
   const pageData = getData("pages");
   const sectionsData = getData("sections");
