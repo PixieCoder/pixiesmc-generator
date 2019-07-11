@@ -43,11 +43,56 @@ export async function getGraphData(dataName, orgId) {
       variables = {orgId};
       break;
     case 'pages': 
-      query = ``;
+      query = `
+        query getPages {
+          allPages(filter: {org: {id: "cjxx2zcoq12bg0124patf4mw9"}}) {
+            id
+            title
+            preamble
+            sections {
+              title
+              id
+              text
+              image {
+                id
+                file {
+                  url
+                }
+                caption
+                description
+              }
+            }
+            image {
+              id
+              file {
+                url
+              }
+              caption
+              description
+            }
+            conclusion
+          }
+        }
+      `;
       variables = {orgId};
       break;
     case 'sections': 
-      query = ``;
+      query = `
+        query getSections {
+          allSections{
+            id
+            title
+            text
+            image{
+              file{
+                url
+              }
+              caption
+              description
+            }
+          }
+        }
+      `;
       variables = {orgId};
       break;
     default:
