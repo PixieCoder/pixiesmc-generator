@@ -80,10 +80,23 @@ function writePages(name, pageOutput) {
 
 }
 
+async function processOrg(orgId) {
+  //console.log('orgID: ', orgId);
+  const orgData = await getGraphData("org", orgId);
+  
+  console.log("Large orgdata:", orgData);
+}
+
 export default async function generate() {
   
-  await getGraphData();
-  
+  const {allOrgs} = await getGraphData('allOrgs');
+
+  for (let i = 0; i < allOrgs.length; i++) {
+    const orgId = allOrgs[i].id;
+    processOrg(orgId);
+  }
+
+
   const orgData = getData("org");
   const pageData = getData("pages");
   const sectionsData = getData("sections");

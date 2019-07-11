@@ -3,23 +3,62 @@ import pages from '../dummy/pages';
 import sections from '../dummy/sections';
 import {request} from 'graphql-request';
 import fetch from 'axios';
-import graphCoolToken from '../settings/secrets';
+import {graphCoolToken} from '../settings/secrets';
 
-export async function getGraphData(dataName) {
+export async function getGraphData(dataName, orgId) {
+  let query;
+  let variables;
+  switch (dataName) {
+    case 'allOrgs':
+      query = /* GraphQL */ `
+        query {
+          allOrgs {
+            id
+          }
+        }
+      `;
+      break;
+    case 'org': 
+      query = /* GraphQL */ `
+        query getOrg($orgId: ID!){
+          Org(id: $orgId){
+            id
+            name
+            title
+            theme
+            defaultHeader{
+              tagline
+              color
+              logo{
+                url
+              }
+            }
+            defaultFooter{
+              email
+              color
+            }
+          }
+        }
+      `;
+      variables = {orgId};
+      break;
+    case 'pages': 
+      query = ``;
+      variables = {orgId};
+      break;
+    case 'sections': 
+      query = ``;
+      variables = {orgId};
+      break;
+    default:
+      throw new Error(`Unknown data source: ${dataName}`);
+  }
   const endpoint = `https://api.graph.cool/simple/v1/${graphCoolToken}`;
-  const query = /* GraphQL */ `query {allOrgs {id title}}`;
-  const fetchRequest = {
-    method: 'post',
-    headers: {'content-type':'application/json'},
-    body: `{"query": "${query}"}`//JSON.stringify({query:query})
-  };
   try {
-    //const data = await request(endpoint, query);
-    const data = await fetch(endpoint, fetchRequest);
-    const dataJson = await data.json();
-    console.log(dataJson.data);
+    const data = await request(endpoint, query, variables);
+    return data;
   } catch(error) {
-    console.error(error);
+    console.error(error, endpoint);
   }
   
 }
