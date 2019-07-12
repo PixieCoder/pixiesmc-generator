@@ -1,6 +1,6 @@
 import { template } from 'lodash';
 import fs from 'fs';
-import { getData, getGraphData } from './data';
+import { getGraphData } from './data';
 import { deleteFolderRecursive } from './utils';
 
 function createDistFolder(name) {
@@ -86,6 +86,28 @@ async function processOrg(orgId) {
   const sectionData = await getGraphData('sections', orgId);
   const imageData = await getGraphData('images', orgId);
 
+  const headerTemplate = template(fs.readFileSync('./templates/default/header.tpl.html', 'utf8'));
+  const footerTemplate = template(fs.readFileSync('./templates/default/footer.tpl.html', 'utf8'));
+
+  orgData.defaultHeader.html = headerTemplate({ logo: orgData.defaultHeader.logo.url });
+  //  Puts the header from org through the headerTemplate and saves it in headerOuput.
+  orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
+  //  Does the same thing with header, but with footer.
+  createDistFolder(orgData.name);
+  //  Makes a folder for the organization which we're going to save a file for.
+  //  Is supposed to delete the file if it already exists.
+
+  const sectionOutput = generateSections(orgData.theme, sectionData.sections);
+
+  const pageOutput = generatePages(pageData.pages,
+    {
+      header: orgData.defaultHeader,
+      footer: orgData.defaultFooter,
+      sectionOutput,
+    });
+
+  writePages(orgData.name, pageOutput);
+
   console.log('Large orgdata: ', orgData);
   console.log('big pagedata: ', pageData);
   console.log('Wide sectiondata: ', sectionData);
@@ -99,29 +121,4 @@ export default async function generate() {
     const orgId = allOrgs[i].id;
     processOrg(orgId);
   }
-
-  const orgData = getData('org');
-  const pageData = getData('pages');
-  const sectionsData = getData('sections');
-  const headerTemplate = template(fs.readFileSync('./templates/default/header.tpl.html', 'utf8'));
-  const footerTemplate = template(fs.readFileSync('./templates/default/footer.tpl.html', 'utf8'));
-
-  orgData.header[0].html = headerTemplate({ logo: orgData.header[0].logo });
-  //  Puts the header from org through the headerTemplate and saves it in headerOuput.
-  orgData.footer[0].html = footerTemplate({ contact: orgData.footer[0].contact });
-  //  Does the same thing with header, but with footer.
-  createDistFolder(orgData.name);
-  //  Makes a folder for the organization which we're going to save a file for.
-  //  Is supposed to delete the file if it already exists.
-
-  const sectionOutput = generateSections(orgData.theme, sectionsData.sections);
-
-  const pageOutput = generatePages(pageData.pages,
-    {
-      header: orgData.header,
-      footer: orgData.footer,
-      sectionOutput,
-    });
-
-  writePages(orgData.name, pageOutput);
 }
