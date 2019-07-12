@@ -89,9 +89,9 @@ async function processOrg(orgId) {
   const headerTemplate = template(fs.readFileSync('./templates/default/header.tpl.html', 'utf8'));
   const footerTemplate = template(fs.readFileSync('./templates/default/footer.tpl.html', 'utf8'));
 
-  orgData.defaultHeader.html = headerTemplate({ logo: orgData.defaultHeader.logo.url });
+  orgData.defaultHeader.html = 'hender';// headerTemplate({ logo: orgData.defaultHeader.logo.url });
   //  Puts the header from org through the headerTemplate and saves it in headerOuput.
-  orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
+  orgData.defaultFooter.html = 'fonter';// footerTemplate({ contact: orgData.defaultFooter.email });
   //  Does the same thing with header, but with footer.
   createDistFolder(orgData.name);
   //  Makes a folder for the organization which we're going to save a file for.
@@ -108,10 +108,10 @@ async function processOrg(orgId) {
 
   writePages(orgData.name, pageOutput);
 
-  console.log('Large orgdata: ', orgData);
-  console.log('big pagedata: ', pageData);
-  console.log('Wide sectiondata: ', sectionData);
-  console.log('Broad imagedata: ', imageData);
+  //  console.log('Large orgdata: ', orgData);
+  //  console.log('big pagedata: ', pageData);
+  //  console.log('Wide sectiondata: ', sectionData);
+  //  console.log('Broad imagedata: ', imageData);
 }
 
 export default async function generate() {
