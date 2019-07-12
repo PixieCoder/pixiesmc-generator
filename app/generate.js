@@ -87,9 +87,15 @@ async function processOrg(orgId) {
   console.log("Large orgdata:", orgData);
 }
 
+async function processPage() {
+
+
+}
+
 export default async function generate() {
   
   const {allOrgs} = await getGraphData('allOrgs');
+  const {allPages} = await getGraphData('');
 
   for (let i = 0; i < allOrgs.length; i++) {
     const orgId = allOrgs[i].id;

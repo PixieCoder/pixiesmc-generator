@@ -74,7 +74,7 @@ export async function getGraphData(dataName, orgId) {
           }
         }
       `;
-      variables = {orgId};
+      variables = {pageId};
       break;
     case 'sections': 
       query = `
@@ -93,7 +93,7 @@ export async function getGraphData(dataName, orgId) {
           }
         }
       `;
-      variables = {orgId};
+      variables = {sectionId};
       break;
     default:
       throw new Error(`Unknown data source: ${dataName}`);
