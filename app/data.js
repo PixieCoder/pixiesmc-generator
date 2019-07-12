@@ -1,8 +1,8 @@
+import { request } from 'graphql-request';
+import { graphCoolToken } from '../settings/secrets';
 import org from '../dummy/org';
 import pages from '../dummy/pages';
 import sections from '../dummy/sections';
-import {request} from 'graphql-request';
-import {graphCoolToken} from '../settings/secrets';
 
 const queries = {
   allOrgs: `
@@ -32,7 +32,7 @@ const queries = {
         }
       }
     }
-  `, 
+  `,
   pages: `
     query getPages($orgId: ID!) {
       allPages(filter: {org: {id: $orgId}}) {
@@ -95,18 +95,19 @@ const queries = {
 };
 
 export async function getGraphData(dataName, orgId) {
-  let query = queries[dataName];
+  const query = queries[dataName];
   if (!query) {
     throw new Error(`Unknown data source: ${dataName}`);
   }
-  const variables = {orgId};
+  const variables = { orgId };
   const endpoint = `https://api.graph.cool/simple/v1/${graphCoolToken}`;
 
   try {
     const data = await request(endpoint, query, variables);
     return data;
-  } catch(error) {
+  } catch (error) {
     console.error(error, endpoint);
+    return null;
   }
 }
 
