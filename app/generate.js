@@ -31,7 +31,8 @@ function generateSections(theme, sections) {
   return retArray;
 }
 
-function generatePages(pages, header, footer, sectionOutput) {
+function generatePages(pages, renderedComponents) {
+  const { header, footer, sectionOutput } = renderedComponents;
   const retArray = [];
   const preambleTemplate = template(fs.readFileSync('./templates/default/preamble.tpl.html', 'utf8'));
   const conclusionTemplate = template(fs.readFileSync('./templates/default/conclusion.tpl.html', 'utf8'));
@@ -116,9 +117,11 @@ export default async function generate() {
   const sectionOutput = generateSections(orgData.theme, sectionsData.sections);
 
   const pageOutput = generatePages(pageData.pages,
-    orgData.footer,
-    orgData.header,
-    sectionOutput);
+    {
+      header: orgData.header,
+      footer: orgData.footer,
+      sectionOutput,
+    });
 
   writePages(orgData.name, pageOutput);
 }
