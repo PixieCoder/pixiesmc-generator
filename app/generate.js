@@ -83,19 +83,19 @@ function writePages(name, pageOutput) {
 async function processOrg(orgId) {
   //console.log('orgID: ', orgId);
   const orgData = await getGraphData("org", orgId);
-  
-  console.log("Large orgdata:", orgData);
+  const pageData = await getGraphData("pages", orgId);
+  const sectionData = await getGraphData("sections", orgId);
+  const imageData = await getGraphData("images", orgId);
+
+  //console.log("Large orgdata: ", orgData);
+  //console.log("big pagedata: ", pageData);
+  console.log("Wide sectionData: ", sectionData);
 }
 
-async function processPage() {
-
-
-}
 
 export default async function generate() {
   
   const {allOrgs} = await getGraphData('allOrgs');
-  const {allPages} = await getGraphData('');
 
   for (let i = 0; i < allOrgs.length; i++) {
     const orgId = allOrgs[i].id;
