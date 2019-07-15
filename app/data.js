@@ -36,7 +36,11 @@ const queries = {
   pages: `
     query getPages($orgId: ID!) {
       allPages(filter: {org: {id: $orgId}}) {
+        link
         id
+        org{
+          id
+        }
         title
         preamble
         sections {
@@ -45,11 +49,12 @@ const queries = {
         }
         image {
           id
+          org{
+            id
+          }
           file {
             url
           }
-          caption
-          description
         }
         conclusion
       }
@@ -62,11 +67,7 @@ const queries = {
         title
         text
         image{
-          file{
-            url
-          }
-          caption
-          description
+          id
         }
       }
     }

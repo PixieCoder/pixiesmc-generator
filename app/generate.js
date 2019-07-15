@@ -11,16 +11,24 @@ function createDistFolder(name) {
   fs.mkdirSync(distName, { recursive: true });
 }
 
-function generateSections(theme, sections) {
+function generateSections(theme, sections, imageOutput) {
   const retArray = [];
   const sectionTemplate = template(fs.readFileSync(`./templates/${theme}/section.tpl.html`, 'utf8'));
-  const imageTemplate = template(fs.readFileSync(`./templates/${theme}/image.tpl.html`, 'utf8'));
 
   for (let i = 0; i < sections.length; i += 1) {
     const section = sections[i];
 
+    //  Send image url and id here
+
     if (section.image) {
-      section.imageHtml = imageTemplate(section.image);
+      const image = imageOutput.find((element) => {
+        if (element.id === section.image.id) {
+          return true;
+        }
+        return false;
+      });
+
+      section.imageHtml = image.html;
     } else {
       section.imageHtml = '';
     }
@@ -32,19 +40,44 @@ function generateSections(theme, sections) {
   return retArray;
 }
 
-function generatePages(pages, renderedComponents) {
-  const { header, footer, sectionOutput } = renderedComponents;
+function generateImages(theme, images) {
   const retArray = [];
-  const preambleTemplate = template(fs.readFileSync('./templates/default/preamble.tpl.html', 'utf8'));
-  const conclusionTemplate = template(fs.readFileSync('./templates/default/conclusion.tpl.html', 'utf8'));
-  const pageTemplate = template(fs.readFileSync('./templates/default/page.tpl.html', 'utf8'));
-  const imageTemplate = template(fs.readFileSync('./templates/default/image.tpl.html', 'utf8'));
+  const imageTemplate = template(fs.readFileSync(`./templates/${theme}/image.tpl.html`, 'utf8'));
+
+  for (let i = 0; i < images.length; i += 1) {
+    const image = images[i];
+    retArray.push({ html: imageTemplate(image), id: image.id });
+  }
+  return retArray;
+}
+
+function generatePages(theme, pages, renderedComponents) {
+  const {
+    header,
+    footer,
+    sectionOutput,
+    imageOutput,
+  } = renderedComponents;
+  const retArray = [];
+  const preambleTemplate = template(fs.readFileSync(`./templates/${theme}/preamble.tpl.html`, 'utf8'));
+  const conclusionTemplate = template(fs.readFileSync(`./templates/${theme}/conclusion.tpl.html`, 'utf8'));
+  const pageTemplate = template(fs.readFileSync(`./templates/${theme}/page.tpl.html`, 'utf8'));
 
   for (let i = 0; i < pages.length; i += 1) {
     const page = pages[i];
 
+
     if (page.image) {
-      page.imageHtml = imageTemplate(page.image);
+      const image = imageOutput.find((element) => {
+        if (element.id === page.image.id) {
+          return true;
+        }
+        return false;
+      });
+      if (!image) {
+        throw new Error('Image not found.');
+      }
+      page.imageHtml = image.html;
     } else {
       page.imageHtml = '';
     }
@@ -86,19 +119,14 @@ function writePages(name, pageOutput) {
   }
 }
 
-function generateImages() {
-
-
-}
-
 async function processOrg(orgId) {
   const { Org: orgData } = await getGraphData('org', orgId);
   const pageData = await getGraphData('pages', orgId);
   const sectionData = await getGraphData('sections', orgId);
   const imageData = await getGraphData('images', orgId);
 
-  const headerTemplate = template(fs.readFileSync('./templates/default/header.tpl.html', 'utf8'));
-  const footerTemplate = template(fs.readFileSync('./templates/default/footer.tpl.html', 'utf8'));
+  const headerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/header.tpl.html`, 'utf8'));
+  const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
   orgData.defaultHeader.html = headerTemplate({ logo: orgData.defaultHeader.logo.url });
   //  Puts the header from org through the headerTemplate and saves it in headerOuput.
@@ -108,15 +136,16 @@ async function processOrg(orgId) {
   //  Makes a folder for the organization which we're going to save a file for.
   //  Is supposed to delete the file if it already exists.
 
-  const imageOutput = generateImages(imageData.allImages);
+  const imageOutput = generateImages(orgData.theme, imageData.allImages);
 
-  const sectionOutput = generateSections(orgData.theme, sectionData.allSections);
+  const sectionOutput = generateSections(orgData.theme, sectionData.allSections, imageOutput);
 
-  const pageOutput = generatePages(pageData.allPages,
+  const pageOutput = generatePages(orgData.theme, pageData.allPages,
     {
       header: orgData.defaultHeader,
       footer: orgData.defaultFooter,
       sectionOutput,
+      imageOutput,
     });
 
   writePages(orgData.name, pageOutput);
