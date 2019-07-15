@@ -42,15 +42,6 @@ const queries = {
         sections {
           title
           id
-          text
-          image {
-            id
-            file {
-              url
-            }
-            caption
-            description
-          }
         }
         image {
           id
