@@ -13,7 +13,7 @@ function createDistFolder(name) {
 
 function generateSections(theme, sections, imageOutput) {
   const retArray = [];
-  const sectionTemplate = template(fs.readFileSync(`./templates/default/section.tpl.html`, 'utf8'));
+  const sectionTemplate = template(fs.readFileSync(`./templates/${theme}/section.tpl.html`, 'utf8'));
 
   for (let i = 0; i < sections.length; i += 1) {
     const section = sections[i];
@@ -38,7 +38,7 @@ function generateSections(theme, sections, imageOutput) {
 
 function generateImages(theme, images) {
   const retArray = [];
-  const imageTemplate = template(fs.readFileSync(`./templates/default/image.tpl.html`, 'utf8'));
+  const imageTemplate = template(fs.readFileSync(`./templates/${theme}/image.tpl.html`, 'utf8'));
 
   for (let i = 0; i < images.length; i += 1) {
     const image = images[i];
@@ -56,9 +56,9 @@ function generatePages(renderedComponents) {
     imageOutput,
   } = renderedComponents;
   const retArray = [];
-  const preambleTemplate = template(fs.readFileSync(`./templates/default/preamble.tpl.html`, 'utf8'));
-  const conclusionTemplate = template(fs.readFileSync(`./templates/default/conclusion.tpl.html`, 'utf8'));
-  const pageTemplate = template(fs.readFileSync(`./templates/default/page.tpl.html`, 'utf8'));
+  const preambleTemplate = template(fs.readFileSync(`./templates/${theme}/preamble.tpl.html`, 'utf8'));
+  const conclusionTemplate = template(fs.readFileSync(`./templates/${theme}/conclusion.tpl.html`, 'utf8'));
+  const pageTemplate = template(fs.readFileSync(`./templates/${theme}/page.tpl.html`, 'utf8'));
 
   for (let i = 0; i < pages.length; i += 1) {
     const page = pages[i];
@@ -123,8 +123,12 @@ async function processOrg(orgId) {
   const sectionData = await getData('sections', orgId);
   const imageData = await getData('images', orgId);
 
-  const headerTemplate = template(fs.readFileSync(`./templates/default/header.tpl.html`, 'utf8'));
-  const footerTemplate = template(fs.readFileSync(`./templates/default/footer.tpl.html`, 'utf8'));
+  if (!fs.existsSync(`./templates/${orgData.theme}`)) {
+    throw new Error('Template folder not found.');
+  }
+
+  const headerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/header.tpl.html`, 'utf8'));
+  const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
   orgData.defaultHeader.html = headerTemplate({ logo: orgData.defaultHeader.logo.url });
   orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
