@@ -86,6 +86,11 @@ function writePages(name, pageOutput) {
   }
 }
 
+function generateImages() {
+
+
+}
+
 async function processOrg(orgId) {
   const { Org: orgData } = await getGraphData('org', orgId);
   const pageData = await getGraphData('pages', orgId);
@@ -102,6 +107,8 @@ async function processOrg(orgId) {
   createDistFolder(orgData.name);
   //  Makes a folder for the organization which we're going to save a file for.
   //  Is supposed to delete the file if it already exists.
+
+  const imageOutput = generateImages(imageData.allImages);
 
   const sectionOutput = generateSections(orgData.theme, sectionData.allSections);
 
