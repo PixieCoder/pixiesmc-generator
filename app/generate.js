@@ -1,14 +1,25 @@
 import { template } from 'lodash';
 import fs from 'fs';
 import { getData } from './data';
-import { deleteFolderRecursive } from './utils';
+import { deleteFolderRecursive, copyFolderContentsRecursive } from './utils';
 
 function createDistFolder(name) {
   const distName = `./dist/${name}`;
-  if (fs.existsSync(distName)) {
-    deleteFolderRecursive(distName);
-  }
+  deleteFolderRecursive(distName);
+
   fs.mkdirSync(distName, { recursive: true });
+}
+
+function importAssets(name, theme) {
+  if (fs.existsSync(`./templates/${theme}/assets`)) {
+    copyFolderContentsRecursive(`./templates/${theme}/assets`, `./dist/${name}`);
+  }
+}
+
+function createCss(name, theme) {
+  const fileDest = `./dist/${name}/css`;
+  fs.mkdirSync(fileDest, { recursive: true });
+  fs.copyFileSync(`./templates/${theme}/${theme}.css`, fileDest);
 }
 
 function generateSections(theme, sections, imageOutput) {
@@ -135,6 +146,8 @@ async function processOrg(orgId) {
   orgData.defaultHeader.html = headerTemplate({ logo: orgData.defaultHeader.logo.url });
   orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
   createDistFolder(orgData.name);
+  importAssets(orgData.name, orgData.theme);
+  //createCss(orgData.name, orgData.theme);
 
   const imageOutput = generateImages(orgData.theme, imageData.allImages);
 
