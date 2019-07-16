@@ -49,6 +49,7 @@ function generateImages(theme, images) {
 
 function generatePages(renderedComponents) {
   const {
+    theme,
     pages,
     header,
     footer,
@@ -105,6 +106,7 @@ function generatePages(renderedComponents) {
       });
       page.sectionsHtml.push(section.html);
     }
+
     retArray.push({ link: page.link, output: pageTemplate(page) });
   }
   //  Writes out the html file and then saves it to a txt.
