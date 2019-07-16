@@ -25,7 +25,7 @@ export function copyFolderContentsRecursive(source, destination) {
       const currentPath = `${source}/${file}`;
       if (fs.lstatSync(currentPath).isDirectory()) {
         fs.mkdirSync(`${destination}/${file}`);
-        copyFolderContentsRecursive(currentPath, destination);
+        copyFolderContentsRecursive(currentPath, `${destination}/${file}`);
           //  copyFolderCOntentsRecursive destination gör den arg.-kolla efter lunch
       } else {
         fs.copyFileSync(file, destination);
