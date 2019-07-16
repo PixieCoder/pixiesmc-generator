@@ -26,12 +26,11 @@ export function copyFolderContentsRecursive(source, destination) {
       if (fs.lstatSync(currentPath).isDirectory()) {
         fs.mkdirSync(`${destination}/${file}`);
         copyFolderContentsRecursive(currentPath, `${destination}/${file}`);
-          //  copyFolderCOntentsRecursive destination gör den arg.-kolla efter lunch
       } else {
-        fs.copyFileSync(file, destination);
+        fs.copyFileSync(currentPath, `${destination}/${file}`);
       }
     });
   }
 }
 
-export default { deleteFolderRecursive };
+export default { deleteFolderRecursive, copyFolderContentsRecursive };

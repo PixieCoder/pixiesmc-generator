@@ -3,3 +3,8 @@ body {
     color: white;
 }
 
+.image-caption {
+    color: brown;
+    display: block;
+    font-style: italic;
+}
