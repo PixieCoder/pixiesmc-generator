@@ -3,17 +3,23 @@ body {
     color: white;
 }
 
+section {
+    float: left;
+    width: 100%;
+}
+
 .image-caption {
     display: block;
     font-style: italic;
 }
 
 .images {
-    border: 5px solid white;
+    float: left;
+    border: 5px solid white; 
     padding: 10px;
+    margin-right: 10px;
 }
 
-.sections {
-    
+.section-text {
 }
 
