@@ -1,5 +1,5 @@
 import { template } from 'lodash';
-import fs from 'fs';
+import fs, { mkdirSync } from 'fs';
 import { getGraphData } from './data';
 import { deleteFolderRecursive } from './utils';
 
@@ -10,6 +10,15 @@ function createDistFolder(name) {
   }
   fs.mkdirSync(distName, { recursive: true });
 }
+
+/*function createCss(name, theme) {
+  const fileDest = './dist/css';
+  if (true) {
+    fs.mkdirSync(fileDest, { recursive: true });
+  }
+
+  fs.copyFileSync(`./templates/${theme}/${theme}.css`, fileDest);
+}*/
 
 function generateSections(theme, sections, imageOutput) {
   const retArray = [];
@@ -107,6 +116,7 @@ function generatePages(theme, pages, renderedComponents) {
       });
       page.sectionsHtml.push(section.html);
     }
+
     retArray.push({ link: page.link, output: pageTemplate(page) });
   }
   //  Writes out the html file and then saves it to a txt.
@@ -137,6 +147,7 @@ async function processOrg(orgId) {
   orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
   //  Does the same thing with header, but with footer.
   createDistFolder(orgData.name);
+  //createCss(orgData.name, orgData.theme);
   //  Makes a folder for the organization which we're going to save a file for.
   //  Is supposed to delete the file if it already exists.
 
