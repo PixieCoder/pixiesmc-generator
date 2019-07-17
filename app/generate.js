@@ -1,6 +1,6 @@
 import { template } from 'lodash';
 import fs from 'fs';
-import { getGraphData } from './data';
+import { getData } from './data';
 import { deleteFolderRecursive } from './utils';
 
 function createDistFolder(name) {
@@ -49,7 +49,6 @@ function generateImages(theme, images) {
 
 function generatePages(renderedComponents) {
   const {
-    theme,
     pages,
     header,
     footer,
@@ -96,6 +95,7 @@ function generatePages(renderedComponents) {
     page.footer = footer;
 
     page.sectionsHtml = [];
+
     for (let j = 0; j < page.sections.length; j += 1) {
       const section = sectionOutput.find((element) => {
         if (element.id === page.sections[j].id) {
@@ -118,10 +118,10 @@ function writePages(name, pageOutput) {
 }
 
 async function processOrg(orgId) {
-  const { Org: orgData } = await getGraphData('org', orgId);
-  const pageData = await getGraphData('pages', orgId);
-  const sectionData = await getGraphData('sections', orgId);
-  const imageData = await getGraphData('images', orgId);
+  const { Org: orgData } = await getData('org', orgId);
+  const pageData = await getData('pages', orgId);
+  const sectionData = await getData('sections', orgId);
+  const imageData = await getData('images', orgId);
 
   const headerTemplate = template(fs.readFileSync(`./templates/default/header.tpl.html`, 'utf8'));
   const footerTemplate = template(fs.readFileSync(`./templates/default/footer.tpl.html`, 'utf8'));
@@ -134,19 +134,20 @@ async function processOrg(orgId) {
 
   const sectionOutput = generateSections(orgData.theme, sectionData.allSections, imageOutput);
 
-  const pageOutput = generatePages(orgData.theme, pageData.allPages,
-    {
-      header: orgData.defaultHeader,
-      footer: orgData.defaultFooter,
-      sectionOutput,
-      imageOutput,
-    });
+  const pageOutput = generatePages({
+    theme: orgData.theme,
+    pages: pageData.allPages,
+    header: orgData.defaultHeader,
+    footer: orgData.defaultFooter,
+    sectionOutput,
+    imageOutput,
+  });
 
   writePages(orgData.name, pageOutput);
 }
 
 export default async function generate() {
-  const { allOrgs } = await getGraphData('allOrgs');
+  const { allOrgs } = await getData('allOrgs');
 
   for (let i = 0; i < allOrgs.length; i += 1) {
     const orgId = allOrgs[i].id;

@@ -83,7 +83,7 @@ const queries = {
   `,
 };
 
-export async function getGraphData(dataName, orgId) {
+export async function getData(dataName, orgId) {
   const query = queries[dataName];
   if (!query) {
     throw new Error(`Unknown data source: ${dataName}`);
@@ -100,6 +100,4 @@ export async function getGraphData(dataName, orgId) {
   }
 }
 
-export function getData(dataName) {
-  
-}
+export default { getData };
