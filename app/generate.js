@@ -33,6 +33,8 @@ function generateHeader(components) {
     description: logoDescription,
     tagline: headerTagline,
   });
+}
+
 async function saveImage(orgName, fileName, fileUrl) {
   if (!fs.existsSync(`./dist/${orgName}/img/`)) {
     fs.mkdirSync(`./dist/${orgName}/img/`, { recursive: true });
