@@ -137,6 +137,8 @@ async function processOrg(orgId) {
   const headerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/header.tpl.html`, 'utf8'));
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
+  //  Check if there's a normal header to use instead of defaultHeader
+
   if (!orgData.defaultHeader.logo) {
     throw new Error('Header must have logo');
   }
@@ -145,6 +147,9 @@ async function processOrg(orgId) {
     description: orgData.defaultHeader.logoDescription,
     tagline: orgData.defaultHeader.tagline,
   });
+
+  //  Check if there's a normal footer to use instead of defaultFooter
+
   orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
   createDistFolder(orgData.name);
   importAssets(orgData.name, orgData.theme);
