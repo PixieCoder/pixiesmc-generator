@@ -1,106 +1,156 @@
 import { template } from 'lodash';
-import { getData } from './data';
 import fs from 'fs';
-import { deleteFolderRecursive } from "./utils";
+import { getData } from './data';
+import { deleteFolderRecursive } from './utils';
 
 function createDistFolder(name) {
-  const distName = './dist/' + name;
+  const distName = `./dist/${name}`;
   if (fs.existsSync(distName)) {
     deleteFolderRecursive(distName);
   }
-  fs.mkdirSync(distName, {recursive: true});
+  fs.mkdirSync(distName, { recursive: true });
 }
 
-function generateSections(theme, sections) {
-  let retArray = [];
-  const sectionTemplate = template(fs.readFileSync('./templates/' + theme + '/section.tpl.html', 'utf8'));
-  const imageTemplate = template(fs.readFileSync('./templates/' + theme + '/image.tpl.html', 'utf8'));
-  
-  for (let i = 0; i < sections.length; i++) {
-    let section = sections[i];
+function generateSections(theme, sections, imageOutput) {
+  const retArray = [];
+  const sectionTemplate = template(fs.readFileSync(`./templates/default/section.tpl.html`, 'utf8'));
+
+  for (let i = 0; i < sections.length; i += 1) {
+    const section = sections[i];
 
     if (section.image) {
-      section.imageHtml = imageTemplate(section.image);
+      const image = imageOutput.find((element) => {
+        if (element.id === section.image.id) {
+          return true;
+        }
+        return false;
+      });
+
+      section.imageHtml = image.html;
     } else {
-      section.imageHtml = "";
+      section.imageHtml = '';
     }
-    retArray.push(sectionTemplate(section));
-    //Does the same thing with header and footer templates, but with sections.
-    //Puts all the information in an array and saves it in sectionOutput'i'.
+
+    retArray.push({ html: sectionTemplate(section), id: section.id });
   }
   return retArray;
 }
 
-function generatePages(pages, header, footer, sectionOutput) {
-  let retArray = [];
-  const preambleTemplate = template(fs.readFileSync('./templates/default/preamble.tpl.html', 'utf8'));
-  const conclusionTemplate = template(fs.readFileSync('./templates/default/conclusion.tpl.html', 'utf8'));
-  const pageTemplate = template(fs.readFileSync('./templates/default/page.tpl.html', 'utf8'));
-  const imageTemplate = template(fs.readFileSync('./templates/default/image.tpl.html', 'utf8'));
-  
-  for (let i = 0; i < pages.length; i++) {
-    let page = pages[i];
+function generateImages(theme, images) {
+  const retArray = [];
+  const imageTemplate = template(fs.readFileSync(`./templates/default/image.tpl.html`, 'utf8'));
+
+  for (let i = 0; i < images.length; i += 1) {
+    const image = images[i];
+    retArray.push({ html: imageTemplate(image), id: image.id });
+  }
+  return retArray;
+}
+
+function generatePages(renderedComponents) {
+  const {
+    pages,
+    header,
+    footer,
+    sectionOutput,
+    imageOutput,
+  } = renderedComponents;
+  const retArray = [];
+  const preambleTemplate = template(fs.readFileSync(`./templates/default/preamble.tpl.html`, 'utf8'));
+  const conclusionTemplate = template(fs.readFileSync(`./templates/default/conclusion.tpl.html`, 'utf8'));
+  const pageTemplate = template(fs.readFileSync(`./templates/default/page.tpl.html`, 'utf8'));
+
+  for (let i = 0; i < pages.length; i += 1) {
+    const page = pages[i];
+
 
     if (page.image) {
-      page.imageHtml = imageTemplate(page.image);
+      const image = imageOutput.find((element) => {
+        if (element.id === page.image.id) {
+          return true;
+        }
+        return false;
+      });
+      if (!image) {
+        throw new Error('Image not found.');
+      }
+      page.imageHtml = image.html;
     } else {
-      page.imageHtml = ""
+      page.imageHtml = '';
     }
 
     if (page.preamble) {
       page.preambleHtml = preambleTemplate(page);
     } else {
-      page.preambleHtml = ""
+      page.preambleHtml = '';
     }
 
     if (page.conclusion) {
       page.conclusionHtml = conclusionTemplate(page);
     } else {
-      page.conclusionHtml = ""
+      page.conclusionHtml = '';
     }
 
-    page.header = header[0];
-    page.footer = footer[0];
-    
+    page.header = header;
+    page.footer = footer;
+
     page.sectionsHtml = [];
-    for (let i = 0; i < page.sections.length; i++) {
-      page.sectionsHtml.push(sectionOutput[page.sections[i]]);
-    }
 
-    retArray.push({link: page.link, output: pageTemplate( page )});
+    for (let j = 0; j < page.sections.length; j += 1) {
+      const section = sectionOutput.find((element) => {
+        if (element.id === page.sections[j].id) {
+          return true;
+        }
+        return false;
+      });
+      page.sectionsHtml.push(section.html);
+    }
+    retArray.push({ link: page.link, output: pageTemplate(page) });
   }
-  //Writes out the html file and then saves it to a txt.
+  //  Writes out the html file and then saves it to a txt.
   return retArray;
 }
 
 function writePages(name, pageOutput) {
-  for (let i = 0; i < pageOutput.length; i++){
-    fs.writeFileSync('./dist/' + name + '/' + pageOutput[i].link + '.html', pageOutput[i].output);
+  for (let i = 0; i < pageOutput.length; i += 1) {
+    fs.writeFileSync(`./dist/${name}/${pageOutput[i].link}.html`, pageOutput[i].output);
   }
-
 }
 
-export default function generate() {
-  const orgData = getData("org");
-  const pageData = getData("pages");
-  const sectionsData = getData("sections");
-  const headerTemplate = template(fs.readFileSync('./templates/default/header.tpl.html', 'utf8'));
-  const footerTemplate = template(fs.readFileSync('./templates/default/footer.tpl.html', 'utf8'));
-  
-  orgData.header[0].html = headerTemplate({logo: orgData.header[0].logo});
-  //Puts the header from org through the headerTemplate and saves it in headerOuput.
-  orgData.footer[0].html = footerTemplate({contact: orgData.footer[0].contact});
-  //Does the same thing with header, but with footer.
-  createDistFolder(orgData.name)
-  //Makes a folder for the organization which we're going to save a file for.
-  //Is supposed to delete the file if it already exists.
+async function processOrg(orgId) {
+  const { Org: orgData } = await getData('org', orgId);
+  const pageData = await getData('pages', orgId);
+  const sectionData = await getData('sections', orgId);
+  const imageData = await getData('images', orgId);
 
-  const sectionOutput = generateSections(orgData.theme, sectionsData.sections);
+  const headerTemplate = template(fs.readFileSync(`./templates/default/header.tpl.html`, 'utf8'));
+  const footerTemplate = template(fs.readFileSync(`./templates/default/footer.tpl.html`, 'utf8'));
 
-  const pageOutput = generatePages(pageData.pages,
-    orgData.footer,
-    orgData.header,
-    sectionOutput, );
+  orgData.defaultHeader.html = headerTemplate({ logo: orgData.defaultHeader.logo.url });
+  orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
+  createDistFolder(orgData.name);
+
+  const imageOutput = generateImages(orgData.theme, imageData.allImages);
+
+  const sectionOutput = generateSections(orgData.theme, sectionData.allSections, imageOutput);
+
+  const pageOutput = generatePages({
+    theme: orgData.theme,
+    pages: pageData.allPages,
+    header: orgData.defaultHeader,
+    footer: orgData.defaultFooter,
+    sectionOutput,
+    imageOutput,
+  });
 
   writePages(orgData.name, pageOutput);
+}
+
+export default async function generate() {
+  const { allOrgs } = await getData('allOrgs');
+
+  for (let i = 0; i < allOrgs.length; i += 1) {
+    const orgId = allOrgs[i].id;
+    processOrg(orgId);
+  }
 }
