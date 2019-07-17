@@ -25,7 +25,10 @@ const queries = {
           }
         }
         defaultFooter{
+          address
+          town
           email
+          phone
           color
         }
       }
