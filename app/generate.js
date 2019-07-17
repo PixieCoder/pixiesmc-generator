@@ -16,12 +16,6 @@ function importAssets(name, theme) {
   }
 }
 
-function createCss(name, theme) {
-  const fileDest = `./dist/${name}/css`;
-  fs.mkdirSync(fileDest, { recursive: true });
-  fs.copyFileSync(`./templates/${theme}/${theme}.css`, fileDest);
-}
-
 function generateSections(theme, sections, imageOutput) {
   const retArray = [];
   const sectionTemplate = template(fs.readFileSync(`./templates/${theme}/section.tpl.html`, 'utf8'));
@@ -143,14 +137,17 @@ async function processOrg(orgId) {
   const headerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/header.tpl.html`, 'utf8'));
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
-  console.log(orgData.defaultHeader.logo);
-  process.exit();
-  
-  orgData.defaultHeader.html = headerTemplate({ logo: orgData.defaultHeader.logo.url });
+  if (!orgData.defaultHeader.logo) {
+    throw new Error('Header must have logo');
+  }
+  orgData.defaultHeader.html = headerTemplate({
+    url: orgData.defaultHeader.logo.url,
+    description: orgData.defaultHeader.logoDescription,
+    tagline: orgData.defaultHeader.tagline,
+  });
   orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
   createDistFolder(orgData.name);
   importAssets(orgData.name, orgData.theme);
-  //createCss(orgData.name, orgData.theme);
 
   const imageOutput = generateImages(orgData.theme, imageData.allImages);
 

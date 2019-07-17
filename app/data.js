@@ -19,6 +19,7 @@ const queries = {
         defaultHeader{
           tagline
           color
+          logoDescription
           logo{
             url
           }
