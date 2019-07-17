@@ -143,6 +143,9 @@ async function processOrg(orgId) {
   const headerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/header.tpl.html`, 'utf8'));
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
+  console.log(orgData.defaultHeader.logo);
+  process.exit();
+  
   orgData.defaultHeader.html = headerTemplate({ logo: orgData.defaultHeader.logo.url });
   orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
   createDistFolder(orgData.name);
