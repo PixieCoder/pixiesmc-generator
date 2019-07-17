@@ -18,8 +18,6 @@ function generateSections(theme, sections, imageOutput) {
   for (let i = 0; i < sections.length; i += 1) {
     const section = sections[i];
 
-    //  Send image url and id here
-
     if (section.image) {
       const image = imageOutput.find((element) => {
         if (element.id === section.image.id) {
@@ -34,8 +32,6 @@ function generateSections(theme, sections, imageOutput) {
     }
 
     retArray.push({ html: sectionTemplate(section), id: section.id });
-    //  Does the same thing with header and footer templates, but with sections.
-    //  Puts all the information in an array and saves it in sectionOutput'i'.
   }
   return retArray;
 }
@@ -51,8 +47,10 @@ function generateImages(theme, images) {
   return retArray;
 }
 
-function generatePages(theme, pages, renderedComponents) {
+function generatePages(renderedComponents) {
   const {
+    theme,
+    pages,
     header,
     footer,
     sectionOutput,
@@ -129,12 +127,8 @@ async function processOrg(orgId) {
   const footerTemplate = template(fs.readFileSync(`./templates/default/footer.tpl.html`, 'utf8'));
 
   orgData.defaultHeader.html = headerTemplate({ logo: orgData.defaultHeader.logo.url });
-  //  Puts the header from org through the headerTemplate and saves it in headerOuput.
   orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
-  //  Does the same thing with header, but with footer.
   createDistFolder(orgData.name);
-  //  Makes a folder for the organization which we're going to save a file for.
-  //  Is supposed to delete the file if it already exists.
 
   const imageOutput = generateImages(orgData.theme, imageData.allImages);
 
@@ -149,11 +143,6 @@ async function processOrg(orgId) {
     });
 
   writePages(orgData.name, pageOutput);
-
-  //  console.log('Large orgdata: ', orgData);
-  //  console.log('big pagedata: ', pageData);
-  //  console.log('Wide sectiondata: ', sectionData);
-  //  console.log('Broad imagedata: ', imageData);
 }
 
 export default async function generate() {
