@@ -56,14 +56,14 @@ function generatePages(renderedComponents) {
   const {
     theme,
     pages,
-    header,
     defaultHeader,
-    footer,
     defaultFooter,
     sectionOutput,
     imageOutput,
   } = renderedComponents;
   const retArray = [];
+  const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
+  const footerTemplate = template(fs.readFileSync(`./templates/${theme}/footer.tpl.html`, 'utf8'));
   const preambleTemplate = template(fs.readFileSync(`./templates/${theme}/preamble.tpl.html`, 'utf8'));
   const conclusionTemplate = template(fs.readFileSync(`./templates/${theme}/conclusion.tpl.html`, 'utf8'));
   const pageTemplate = template(fs.readFileSync(`./templates/${theme}/page.tpl.html`, 'utf8'));
@@ -99,15 +99,23 @@ function generatePages(renderedComponents) {
       page.conclusionHtml = '';
     }
 
-    if (!header) {
+    if (!page.header) {
       page.header = defaultHeader;
     } else {
-      page.header = header;
+      if (!page.header.logo) {
+        throw new Error('Header must have logo');
+      }
+      page.header = headerTemplate({
+        url: page.header.logo.url,
+        description: page.header.logoDescription,
+        tagline: page.header.tagline,
+      });
     }
-    if (!footer) {
+
+    if (!page.footer) {
       page.footer = defaultFooter;
     } else {
-      page.footer = footer;
+      page.footer = footerTemplate({ contact: page.footer.email });
     }
 
     page.sectionsHtml = [];
@@ -147,33 +155,16 @@ async function processOrg(orgId) {
   const headerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/header.tpl.html`, 'utf8'));
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
-  //  Check if there's a normal header to use instead of defaultHeader
-  if (!orgData.header) {
-    if (!orgData.defaultHeader.logo) {
-      throw new Error('Header must have logo');
-    }
-    orgData.defaultHeader.html = headerTemplate({
-      url: orgData.defaultHeader.logo.url,
-      description: orgData.defaultHeader.logoDescription,
-      tagline: orgData.defaultHeader.tagline,
-    });
-  } else {
-    if (!orgData.header.logo) {
-      throw new Error('Header must have logo');
-    }
-    orgData.header.html = headerTemplate({
-      url: orgData.header.logo.url,
-      description: orgData.header.logoDescription,
-      tagline: orgData.header.tagline,
-    });
+  if (!orgData.defaultHeader.logo) {
+    throw new Error('Header must have logo');
   }
+  orgData.defaultHeader.html = headerTemplate({
+    url: orgData.defaultHeader.logo.url,
+    description: orgData.defaultHeader.logoDescription,
+    tagline: orgData.defaultHeader.tagline,
+  });
 
-  //  Check if there's a normal footer to use instead of defaultFooter
-  if (!orgData.footer) {
-    orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
-  } else {
-    orgData.footer.html = footerTemplate({ contact: orgData.footer.email });
-  }
+  orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
 
   createDistFolder(orgData.name);
   importAssets(orgData.name, orgData.theme);
