@@ -21,6 +21,7 @@ const queries = {
           color
           logoDescription
           logo{
+            name
             url
           }
         }
@@ -69,6 +70,7 @@ const queries = {
             id
           }
           file {
+            name
             url
           }
         }

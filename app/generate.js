@@ -35,20 +35,14 @@ function generateHeader(components) {
   });
 }
 
-async function saveImage(orgName, fileName, fileUrl) {
-  if (!fs.existsSync(`./dist/${orgName}/img/`)) {
-    fs.mkdirSync(`./dist/${orgName}/img/`, { recursive: true });
-  }
+async function generateSections(renderedComponents) {
+  const {
+    theme,
+    sections,
+    imageOut,
+    name,
+  } = renderedComponents;
 
-  if (!`./dist/${orgName}/img/$${fileName}`) {
-    const result = await fetch(fileUrl)(result => {
-      const dest = fs.createWriteStream(`./dist/${orgName}/img/$${fileName}`);
-      result.body.pipe(dest);
-    });
-  }
-}
-
-async function generateSections(theme, sections, imageOutput, orgName) {
   const retArray = [];
   const saveImageArray = [];
   const sectionTemplate = template(fs.readFileSync(`./templates/${theme}/section.tpl.html`, 'utf8'));
@@ -57,15 +51,14 @@ async function generateSections(theme, sections, imageOutput, orgName) {
     const section = sections[i];
 
     if (section.image) {
-      const image = imageOutput.find((element) => {
+      const image = imageOut.find((element) => {
         if (element.id === section.image.id) {
           return true;
         }
         return false;
       });
-
       section.imageHtml = image.html;
-      saveImageArray.push(saveImage(`./dist/${orgName}/img/`, image.file.name, image.file.url));
+      saveImageArray.push(saveImage(`./dist/${name}/img/`, image.file.name, image.file.url));
     } else {
       section.imageHtml = '';
     }
@@ -87,16 +80,18 @@ function generateImages(theme, images) {
   return retArray;
 }
 
-function generatePages(renderedComponents) {
+async function generatePages(renderedComponents) {
   const {
     theme,
     pages,
     defaultHeader,
     defaultFooter,
+    name,
     sectionOutput,
     imageOutput,
   } = renderedComponents;
   const retArray = [];
+  const saveImageArray = [];
   const footerTemplate = template(fs.readFileSync(`./templates/${theme}/footer.tpl.html`, 'utf8'));
   const preambleTemplate = template(fs.readFileSync(`./templates/${theme}/preamble.tpl.html`, 'utf8'));
   const conclusionTemplate = template(fs.readFileSync(`./templates/${theme}/conclusion.tpl.html`, 'utf8'));
@@ -116,6 +111,7 @@ function generatePages(renderedComponents) {
         throw new Error('Image not found.');
       }
       page.imageHtml = image.html;
+      saveImageArray.push(saveImage(`./dist/${name}/img/`, image.file.name, image.file.url));
     } else {
       page.imageHtml = '';
     }
@@ -169,7 +165,7 @@ function generatePages(renderedComponents) {
 
     retArray.push({ link: page.link, output: pageTemplate(page) });
   }
-  //  Writes out the html file and then saves it to a txt.
+  await Promise.all(saveImageArray);
   return retArray;
 }
 
@@ -191,6 +187,9 @@ async function processOrg(orgId) {
 
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
+  //  call saveImage for the logo
+  saveImage(`./dist/${orgData.name}/img/`, orgData.defaultHeader.logo.name, orgData.defaultHeader.logo.url);
+
   orgData.defaultHeader.html = generateHeader({
     theme: orgData.theme,
     logo: orgData.defaultHeader.logo,
@@ -198,6 +197,7 @@ async function processOrg(orgId) {
     logoDescription: orgData.defaultHeader.logoDescription,
     headerTagline: orgData.defaultHeader.tagline,
   });
+
   orgData.defaultFooter.html = footerTemplate({
     address: orgData.defaultFooter.address,
     town: orgData.defaultFooter.town,
@@ -210,13 +210,19 @@ async function processOrg(orgId) {
 
   const imageOutput = generateImages(orgData.theme, imageData.allImages);
 
-  const sectionOutput = await generateSections(orgData.theme, sectionData.allSections, imageOutput, orgData.name);
+  const sectionOutput = await generateSections({
+    theme: orgData.theme,
+    sections: sectionData.allSections,
+    imageOut: imageOutput,
+    name: orgData.name,
+  });
 
   const pageOutput = generatePages({
     theme: orgData.theme,
     pages: pageData.allPages,
     defaultHeader: orgData.defaultHeader,
     defaultFooter: orgData.defaultFooter,
+    name: orgData.name,
     sectionOutput,
     imageOutput,
   });
