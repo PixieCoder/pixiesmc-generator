@@ -57,7 +57,9 @@ function generatePages(renderedComponents) {
     theme,
     pages,
     header,
+    defaultHeader,
     footer,
+    defaultFooter,
     sectionOutput,
     imageOutput,
   } = renderedComponents;
@@ -97,8 +99,16 @@ function generatePages(renderedComponents) {
       page.conclusionHtml = '';
     }
 
-    page.header = header;
-    page.footer = footer;
+    if (!header) {
+      page.header = defaultHeader;
+    } else {
+      page.header = header;
+    }
+    if (!footer) {
+      page.footer = defaultFooter;
+    } else {
+      page.footer = footer;
+    }
 
     page.sectionsHtml = [];
 
@@ -138,19 +148,33 @@ async function processOrg(orgId) {
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
   //  Check if there's a normal header to use instead of defaultHeader
-
-  if (!orgData.defaultHeader.logo) {
-    throw new Error('Header must have logo');
+  if (!orgData.header) {
+    if (!orgData.defaultHeader.logo) {
+      throw new Error('Header must have logo');
+    }
+    orgData.defaultHeader.html = headerTemplate({
+      url: orgData.defaultHeader.logo.url,
+      description: orgData.defaultHeader.logoDescription,
+      tagline: orgData.defaultHeader.tagline,
+    });
+  } else {
+    if (!orgData.header.logo) {
+      throw new Error('Header must have logo');
+    }
+    orgData.header.html = headerTemplate({
+      url: orgData.header.logo.url,
+      description: orgData.header.logoDescription,
+      tagline: orgData.header.tagline,
+    });
   }
-  orgData.defaultHeader.html = headerTemplate({
-    url: orgData.defaultHeader.logo.url,
-    description: orgData.defaultHeader.logoDescription,
-    tagline: orgData.defaultHeader.tagline,
-  });
 
   //  Check if there's a normal footer to use instead of defaultFooter
+  if (!orgData.footer) {
+    orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
+  } else {
+    orgData.footer.html = footerTemplate({ contact: orgData.footer.email });
+  }
 
-  orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
   createDistFolder(orgData.name);
   importAssets(orgData.name, orgData.theme);
 
@@ -161,8 +185,10 @@ async function processOrg(orgId) {
   const pageOutput = generatePages({
     theme: orgData.theme,
     pages: pageData.allPages,
-    header: orgData.defaultHeader,
-    footer: orgData.defaultFooter,
+    header: orgData.header,
+    defaultHeader: orgData.defaultHeader,
+    footer: orgData.footer,
+    defaultFooter: orgData.defaultFooter,
     sectionOutput,
     imageOutput,
   });
