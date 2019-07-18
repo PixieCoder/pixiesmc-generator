@@ -1,19 +1,24 @@
 import { template } from 'lodash';
 import fs from 'fs';
 import { getData } from './data';
-import { deleteFolderRecursive } from './utils';
+import { deleteFolderRecursive, copyFolderContentsRecursive } from './utils';
 
 function createDistFolder(name) {
   const distName = `./dist/${name}`;
-  if (fs.existsSync(distName)) {
-    deleteFolderRecursive(distName);
-  }
+  deleteFolderRecursive(distName);
+
   fs.mkdirSync(distName, { recursive: true });
+}
+
+function importAssets(name, theme) {
+  if (fs.existsSync(`./templates/${theme}/assets`)) {
+    copyFolderContentsRecursive(`./templates/${theme}/assets`, `./dist/${name}`);
+  }
 }
 
 function generateSections(theme, sections, imageOutput) {
   const retArray = [];
-  const sectionTemplate = template(fs.readFileSync(`./templates/default/section.tpl.html`, 'utf8'));
+  const sectionTemplate = template(fs.readFileSync(`./templates/${theme}/section.tpl.html`, 'utf8'));
 
   for (let i = 0; i < sections.length; i += 1) {
     const section = sections[i];
@@ -38,7 +43,7 @@ function generateSections(theme, sections, imageOutput) {
 
 function generateImages(theme, images) {
   const retArray = [];
-  const imageTemplate = template(fs.readFileSync(`./templates/default/image.tpl.html`, 'utf8'));
+  const imageTemplate = template(fs.readFileSync(`./templates/${theme}/image.tpl.html`, 'utf8'));
 
   for (let i = 0; i < images.length; i += 1) {
     const image = images[i];
@@ -49,6 +54,7 @@ function generateImages(theme, images) {
 
 function generatePages(renderedComponents) {
   const {
+    theme,
     pages,
     header,
     footer,
@@ -56,9 +62,9 @@ function generatePages(renderedComponents) {
     imageOutput,
   } = renderedComponents;
   const retArray = [];
-  const preambleTemplate = template(fs.readFileSync(`./templates/default/preamble.tpl.html`, 'utf8'));
-  const conclusionTemplate = template(fs.readFileSync(`./templates/default/conclusion.tpl.html`, 'utf8'));
-  const pageTemplate = template(fs.readFileSync(`./templates/default/page.tpl.html`, 'utf8'));
+  const preambleTemplate = template(fs.readFileSync(`./templates/${theme}/preamble.tpl.html`, 'utf8'));
+  const conclusionTemplate = template(fs.readFileSync(`./templates/${theme}/conclusion.tpl.html`, 'utf8'));
+  const pageTemplate = template(fs.readFileSync(`./templates/${theme}/page.tpl.html`, 'utf8'));
 
   for (let i = 0; i < pages.length; i += 1) {
     const page = pages[i];
@@ -105,6 +111,7 @@ function generatePages(renderedComponents) {
       });
       page.sectionsHtml.push(section.html);
     }
+
     retArray.push({ link: page.link, output: pageTemplate(page) });
   }
   //  Writes out the html file and then saves it to a txt.
@@ -123,12 +130,24 @@ async function processOrg(orgId) {
   const sectionData = await getData('sections', orgId);
   const imageData = await getData('images', orgId);
 
-  const headerTemplate = template(fs.readFileSync(`./templates/default/header.tpl.html`, 'utf8'));
-  const footerTemplate = template(fs.readFileSync(`./templates/default/footer.tpl.html`, 'utf8'));
+  if (!fs.existsSync(`./templates/${orgData.theme}`)) {
+    throw new Error('Template folder not found.');
+  }
 
-  orgData.defaultHeader.html = headerTemplate({ logo: orgData.defaultHeader.logo.url });
+  const headerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/header.tpl.html`, 'utf8'));
+  const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
+
+  if (!orgData.defaultHeader.logo) {
+    throw new Error('Header must have logo');
+  }
+  orgData.defaultHeader.html = headerTemplate({
+    url: orgData.defaultHeader.logo.url,
+    description: orgData.defaultHeader.logoDescription,
+    tagline: orgData.defaultHeader.tagline,
+  });
   orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
   createDistFolder(orgData.name);
+  importAssets(orgData.name, orgData.theme);
 
   const imageOutput = generateImages(orgData.theme, imageData.allImages);
 

@@ -14,4 +14,18 @@ export function deleteFolderRecursive(path) {
   }
 }
 
-export default { deleteFolderRecursive };
+export function copyFolderContentsRecursive(source, destination) {
+  if (fs.existsSync(source)) {
+    fs.readdirSync(source).forEach((file) => {
+      const currentPath = `${source}/${file}`;
+      if (fs.lstatSync(currentPath).isDirectory()) {
+        fs.mkdirSync(`${destination}/${file}`);
+        copyFolderContentsRecursive(currentPath, `${destination}/${file}`);
+      } else {
+        fs.copyFileSync(currentPath, `${destination}/${file}`);
+      }
+    });
+  }
+}
+
+export default { deleteFolderRecursive, copyFolderContentsRecursive };
