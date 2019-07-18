@@ -92,6 +92,7 @@ const queries = {
     query getImages($orgId: ID!) {
       allImages (filter: {org: {id: $orgId}}) {
         file{
+          name
           url
         }
         id

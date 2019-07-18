@@ -33,6 +33,17 @@ function generateHeader(components) {
     description: logoDescription,
     tagline: headerTagline,
   });
+async function saveImage(orgName, fileName, fileUrl) {
+  if (!fs.existsSync(`./dist/${orgName}/img/`)) {
+    fs.mkdirSync(`./dist/${orgName}/img/`, { recursive: true });
+  }
+
+  if (!`./dist/${orgName}/img/$${fileName}`) {
+    const result = await fetch(fileUrl)(result => {
+      const dest = fs.createWriteStream(`./dist/${orgName}/img/$${fileName}`);
+      result.body.pipe(dest);
+    });
+  }
 }
 
 function generateSections(theme, sections, imageOutput) {
