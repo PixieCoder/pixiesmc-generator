@@ -1,7 +1,7 @@
 import { template } from 'lodash';
 import fs from 'fs';
 import { getData } from './data';
-import { deleteFolderRecursive, copyFolderContentsRecursive } from './utils';
+import { deleteFolderRecursive, copyFolderContentsRecursive, saveImage } from './utils';
 
 function createDistFolder(name) {
   const distName = `./dist/${name}`;
@@ -46,8 +46,9 @@ async function saveImage(orgName, fileName, fileUrl) {
   }
 }
 
-function generateSections(theme, sections, imageOutput) {
+async function generateSections(theme, sections, imageOutput, orgName) {
   const retArray = [];
+  const saveImageArray = [];
   const sectionTemplate = template(fs.readFileSync(`./templates/${theme}/section.tpl.html`, 'utf8'));
 
   for (let i = 0; i < sections.length; i += 1) {
@@ -62,12 +63,14 @@ function generateSections(theme, sections, imageOutput) {
       });
 
       section.imageHtml = image.html;
+      saveImageArray.push(saveImage(`./dist/${orgName}/img/`, image.file.name, image.file.url));
     } else {
       section.imageHtml = '';
     }
 
     retArray.push({ html: sectionTemplate(section), id: section.id });
   }
+  await Promise.all(saveImageArray);
   return retArray;
 }
 
@@ -77,7 +80,7 @@ function generateImages(theme, images) {
 
   for (let i = 0; i < images.length; i += 1) {
     const image = images[i];
-    retArray.push({ html: imageTemplate(image), id: image.id });
+    retArray.push({ html: imageTemplate(image), id: image.id, file: image.file });
   }
   return retArray;
 }
@@ -205,7 +208,7 @@ async function processOrg(orgId) {
 
   const imageOutput = generateImages(orgData.theme, imageData.allImages);
 
-  const sectionOutput = generateSections(orgData.theme, sectionData.allSections, imageOutput);
+  const sectionOutput = await generateSections(orgData.theme, sectionData.allSections, imageOutput, orgData.name);
 
   const pageOutput = generatePages({
     theme: orgData.theme,

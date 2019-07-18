@@ -28,4 +28,16 @@ export function copyFolderContentsRecursive(source, destination) {
   }
 }
 
-export default { deleteFolderRecursive, copyFolderContentsRecursive };
+export async function saveImage(destFolder, fileName, source) {
+  if (!fs.existsSync(destFolder)) {
+    fs.mkdirSync(destFolder, { recursive: true });
+  }
+
+  if (!fs.existsSync(`${destFolder}/${fileName}`)) {
+    const result = await fetch(source);
+    const dest = fs.createWriteStream(`${destFolder}/${fileName}`);
+    result.body.pipe(dest);
+  }
+}
+
+export default { deleteFolderRecursive, copyFolderContentsRecursive, saveImage };
