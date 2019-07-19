@@ -117,7 +117,7 @@ function generatePages(renderedComponents) {
     }
 
     if (!page.header) {
-      page.header.html = defaultHeader;
+      page.header = defaultHeader;
     } else {
       page.header.html = generateHeader({
         theme,
@@ -126,14 +126,12 @@ function generatePages(renderedComponents) {
         logoDescription: page.header.logoDescription,
         logTagline: page.header.tagline,
       });
-      console.log(page.header);
-      process.exit();
     }
 
     if (!page.footer) {
-      page.footer.html = defaultFooter;
+      page.footer = defaultFooter;
     } else {
-      page.footer = footerTemplate({ contact: page.footer.email });
+      page.footer.html = footerTemplate({ contact: page.footer.email });
     }
 
     page.sectionsHtml = [];
