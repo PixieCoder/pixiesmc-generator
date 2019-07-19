@@ -16,6 +16,25 @@ function importAssets(name, theme) {
   }
 }
 
+function generateHeader(components) {
+  const {
+    theme,
+    logo,
+    logoUrl,
+    logoDescription,
+    headerTagline,
+  } = components;
+  const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
+  if (!logo) {
+    throw new Error('Header must have logo');
+  }
+  return headerTemplate({
+    url: logoUrl,
+    description: logoDescription,
+    tagline: headerTagline,
+  });
+}
+
 function generateSections(theme, sections, imageOutput) {
   const retArray = [];
   const sectionTemplate = template(fs.readFileSync(`./templates/${theme}/section.tpl.html`, 'utf8'));
@@ -56,19 +75,19 @@ function generatePages(renderedComponents) {
   const {
     theme,
     pages,
-    header,
-    footer,
+    defaultHeader,
+    defaultFooter,
     sectionOutput,
     imageOutput,
   } = renderedComponents;
   const retArray = [];
+  const footerTemplate = template(fs.readFileSync(`./templates/${theme}/footer.tpl.html`, 'utf8'));
   const preambleTemplate = template(fs.readFileSync(`./templates/${theme}/preamble.tpl.html`, 'utf8'));
   const conclusionTemplate = template(fs.readFileSync(`./templates/${theme}/conclusion.tpl.html`, 'utf8'));
   const pageTemplate = template(fs.readFileSync(`./templates/${theme}/page.tpl.html`, 'utf8'));
 
   for (let i = 0; i < pages.length; i += 1) {
     const page = pages[i];
-
 
     if (page.image) {
       const image = imageOutput.find((element) => {
@@ -97,8 +116,23 @@ function generatePages(renderedComponents) {
       page.conclusionHtml = '';
     }
 
-    page.header = header;
-    page.footer = footer;
+    if (!page.header) {
+      page.header = defaultHeader;
+    } else {
+      page.header.html = generateHeader({
+        theme,
+        logo: page.header.logo,
+        logoUrl: page.header.logo.url,
+        logoDescription: page.header.logoDescription,
+        headerTagline: page.header.tagline,
+      });
+    }
+
+    if (!page.footer) {
+      page.footer = defaultFooter;
+    } else {
+      page.footer.html = footerTemplate({ contact: page.footer.email });
+    }
 
     page.sectionsHtml = [];
 
@@ -134,18 +168,18 @@ async function processOrg(orgId) {
     throw new Error('Template folder not found.');
   }
 
-  const headerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/header.tpl.html`, 'utf8'));
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
-  if (!orgData.defaultHeader.logo) {
-    throw new Error('Header must have logo');
-  }
-  orgData.defaultHeader.html = headerTemplate({
-    url: orgData.defaultHeader.logo.url,
-    description: orgData.defaultHeader.logoDescription,
-    tagline: orgData.defaultHeader.tagline,
+  orgData.defaultHeader.html = generateHeader({
+    theme: orgData.theme,
+    logo: orgData.defaultHeader.logo,
+    logoUrl: orgData.defaultHeader.logo.url,
+    logoDescription: orgData.defaultHeader.logoDescription,
+    headerTagline: orgData.defaultHeader.tagline,
   });
+
   orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
+
   createDistFolder(orgData.name);
   importAssets(orgData.name, orgData.theme);
 
@@ -156,8 +190,8 @@ async function processOrg(orgId) {
   const pageOutput = generatePages({
     theme: orgData.theme,
     pages: pageData.allPages,
-    header: orgData.defaultHeader,
-    footer: orgData.defaultFooter,
+    defaultHeader: orgData.defaultHeader,
+    defaultFooter: orgData.defaultFooter,
     sectionOutput,
     imageOutput,
   });

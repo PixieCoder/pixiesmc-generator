@@ -40,6 +40,18 @@ const queries = {
           id
         }
         title
+        header{
+          tagline
+          color
+          logoDescription
+          logo{
+            url
+          }
+        }
+        footer{
+          email
+          color
+        }
         preamble
         sections {
           title
