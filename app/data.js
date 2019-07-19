@@ -25,7 +25,10 @@ const queries = {
           }
         }
         defaultFooter{
+          address
+          town
           email
+          phone
           color
         }
       }
@@ -49,7 +52,10 @@ const queries = {
           }
         }
         footer{
+          address
+          town
           email
+          phone
           color
         }
         preamble

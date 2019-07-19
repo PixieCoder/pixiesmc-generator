@@ -131,7 +131,12 @@ function generatePages(renderedComponents) {
     if (!page.footer) {
       page.footer = defaultFooter;
     } else {
-      page.footer.html = footerTemplate({ contact: page.footer.email });
+      page.footer.html = footerTemplate({
+        address: page.footer.address,
+        town: page.footer.town,
+        email: page.footer.email,
+        phone: page.footer.phone,
+      });
     }
 
     page.sectionsHtml = [];
@@ -177,8 +182,12 @@ async function processOrg(orgId) {
     logoDescription: orgData.defaultHeader.logoDescription,
     headerTagline: orgData.defaultHeader.tagline,
   });
-
-  orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
+  orgData.defaultFooter.html = footerTemplate({
+    address: orgData.defaultFooter.address,
+    town: orgData.defaultFooter.town,
+    email: orgData.defaultFooter.email,
+    phone: orgData.defaultFooter.phone,
+  });
 
   createDistFolder(orgData.name);
   importAssets(orgData.name, orgData.theme);
