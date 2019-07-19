@@ -217,7 +217,7 @@ async function processOrg(orgId) {
     name: orgData.name,
   });
 
-  const pageOutput = generatePages({
+  const pageOutput = await generatePages({
     theme: orgData.theme,
     pages: pageData.allPages,
     defaultHeader: orgData.defaultHeader,
@@ -226,7 +226,6 @@ async function processOrg(orgId) {
     sectionOutput,
     imageOutput,
   });
-
   writePages(orgData.name, pageOutput);
 }
 
