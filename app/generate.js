@@ -16,12 +16,22 @@ function importAssets(name, theme) {
   }
 }
 
-function generateHeader(theme, headerUrl, headerDescription, headerTagline) {
+function generateHeader(renderedComponents) {
+  const {
+    theme,
+    logo,
+    logoUrl,
+    logoDescription,
+    logoTagline,
+  } = renderedComponents;
   const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
+  if (!logo) {
+    throw new Error('Header must have logo');
+  }
   return headerTemplate({
-    url: headerUrl,
-    description: headerDescription,
-    tagline: headerTagline,
+    url: logoUrl,
+    description: logoDescription,
+    tagline: logoTagline,
   });
 }
 
@@ -79,7 +89,6 @@ function generatePages(renderedComponents) {
   for (let i = 0; i < pages.length; i += 1) {
     const page = pages[i];
 
-
     if (page.image) {
       const image = imageOutput.find((element) => {
         if (element.id === page.image.id) {
@@ -108,20 +117,21 @@ function generatePages(renderedComponents) {
     }
 
     if (!page.header) {
-      page.header = defaultHeader;
+      page.header.html = defaultHeader;
     } else {
-      if (!page.header.logo) {
-        throw new Error('Header must have logo');
-      }
-      page.header = generateHeader(
+      page.header.html = generateHeader({
         theme,
-        page.header.logo.url,
-        page.header.logoDescription,
-        page.header.tagline,
-      );
+        logo: page.header.logo,
+        logoUrl: page.header.logo.url,
+        logoDescription: page.header.logoDescription,
+        logTagline: page.header.tagline,
+      });
+      console.log(page.header);
+      process.exit();
     }
+
     if (!page.footer) {
-      page.footer = defaultFooter;
+      page.footer.html = defaultFooter;
     } else {
       page.footer = footerTemplate({ contact: page.footer.email });
     }
@@ -162,15 +172,13 @@ async function processOrg(orgId) {
 
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
-  if (!orgData.defaultHeader.logo) {
-    throw new Error('Header must have logo');
-  }
-  orgData.defaultHeader.html = generateHeader(
-    orgData.theme,
-    orgData.defaultHeader.logo.url,
-    orgData.defaultHeader.logoDescription,
-    orgData.defaultHeader.tagline,
-  );
+  orgData.defaultHeader.html = generateHeader({
+    theme: orgData.theme,
+    logo: orgData.defaultHeader.logo,
+    logoUrl: orgData.defaultHeader.logo.url,
+    logoDescription: orgData.defaultHeader.logoDescription,
+    logTagline: orgData.defaultHeader.tagline,
+  });
 
   orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
 
