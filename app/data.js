@@ -52,7 +52,10 @@ const queries = {
           }
         }
         footer{
+          address
+          town
           email
+          phone
           color
         }
         preamble
