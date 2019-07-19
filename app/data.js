@@ -50,6 +50,7 @@ const queries = {
           logoDescription
           logo{
             url
+            name
           }
         }
         footer{

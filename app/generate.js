@@ -19,17 +19,19 @@ function importAssets(name, theme) {
 function generateHeader(components) {
   const {
     theme,
+    orgName,
     logo,
-    logoUrl,
     logoDescription,
     headerTagline,
   } = components;
+
   const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
   if (!logo) {
     throw new Error('Header must have logo');
   }
+  saveImage(`./dist/${orgName}/img/`, logo.name, logo.url);
   return headerTemplate({
-    url: logoUrl,
+    logo,
     description: logoDescription,
     tagline: headerTagline,
   });
@@ -133,8 +135,8 @@ async function generatePages(renderedComponents) {
     } else {
       page.header.html = generateHeader({
         theme,
+        orgName: name,
         logo: page.header.logo,
-        logoUrl: page.header.logo.url,
         logoDescription: page.header.logoDescription,
         headerTagline: page.header.tagline,
       });
@@ -187,13 +189,10 @@ async function processOrg(orgId) {
 
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
-  //  call saveImage for the logo
-  saveImage(`./dist/${orgData.name}/img/`, orgData.defaultHeader.logo.name, orgData.defaultHeader.logo.url);
-
   orgData.defaultHeader.html = generateHeader({
     theme: orgData.theme,
+    orgName: orgData.name,
     logo: orgData.defaultHeader.logo,
-    logoUrl: orgData.defaultHeader.logo.url,
     logoDescription: orgData.defaultHeader.logoDescription,
     headerTagline: orgData.defaultHeader.tagline,
   });
