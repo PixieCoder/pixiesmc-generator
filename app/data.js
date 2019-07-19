@@ -16,14 +16,6 @@ const queries = {
         name
         title
         theme
-        headers{
-          tagline
-          color
-          logoDescription
-          logo{
-            url
-          }
-        }
         defaultHeader{
           tagline
           color
@@ -31,10 +23,6 @@ const queries = {
           logo{
             url
           }
-        }
-        footers{
-          email
-          color
         }
         defaultFooter{
           email

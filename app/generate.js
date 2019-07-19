@@ -16,6 +16,15 @@ function importAssets(name, theme) {
   }
 }
 
+function generateHeader(theme, headerUrl, headerDescription, headerTagline) {
+  const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
+  return headerTemplate({
+    url: headerUrl,
+    description: headerDescription,
+    tagline: headerTagline,
+  });
+}
+
 function generateSections(theme, sections, imageOutput) {
   const retArray = [];
   const sectionTemplate = template(fs.readFileSync(`./templates/${theme}/section.tpl.html`, 'utf8'));
@@ -62,7 +71,6 @@ function generatePages(renderedComponents) {
     imageOutput,
   } = renderedComponents;
   const retArray = [];
-  const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
   const footerTemplate = template(fs.readFileSync(`./templates/${theme}/footer.tpl.html`, 'utf8'));
   const preambleTemplate = template(fs.readFileSync(`./templates/${theme}/preamble.tpl.html`, 'utf8'));
   const conclusionTemplate = template(fs.readFileSync(`./templates/${theme}/conclusion.tpl.html`, 'utf8'));
@@ -105,13 +113,13 @@ function generatePages(renderedComponents) {
       if (!page.header.logo) {
         throw new Error('Header must have logo');
       }
-      page.header = headerTemplate({
-        url: page.header.logo.url,
-        description: page.header.logoDescription,
-        tagline: page.header.tagline,
-      });
+      page.header = generateHeader(
+        theme,
+        page.header.logo.url,
+        page.header.logoDescription,
+        page.header.tagline,
+      );
     }
-
     if (!page.footer) {
       page.footer = defaultFooter;
     } else {
@@ -152,17 +160,17 @@ async function processOrg(orgId) {
     throw new Error('Template folder not found.');
   }
 
-  const headerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/header.tpl.html`, 'utf8'));
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
   if (!orgData.defaultHeader.logo) {
     throw new Error('Header must have logo');
   }
-  orgData.defaultHeader.html = headerTemplate({
-    url: orgData.defaultHeader.logo.url,
-    description: orgData.defaultHeader.logoDescription,
-    tagline: orgData.defaultHeader.tagline,
-  });
+  orgData.defaultHeader.html = generateHeader(
+    orgData.theme,
+    orgData.defaultHeader.logo.url,
+    orgData.defaultHeader.logoDescription,
+    orgData.defaultHeader.tagline,
+  );
 
   orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
 
@@ -176,9 +184,7 @@ async function processOrg(orgId) {
   const pageOutput = generatePages({
     theme: orgData.theme,
     pages: pageData.allPages,
-    header: orgData.header,
     defaultHeader: orgData.defaultHeader,
-    footer: orgData.footer,
     defaultFooter: orgData.defaultFooter,
     sectionOutput,
     imageOutput,
