@@ -16,14 +16,14 @@ function importAssets(name, theme) {
   }
 }
 
-function generateHeader(renderedComponents) {
+function generateHeader(components) {
   const {
     theme,
     logo,
     logoUrl,
     logoDescription,
-    logoTagline,
-  } = renderedComponents;
+    headerTagline,
+  } = components;
   const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
   if (!logo) {
     throw new Error('Header must have logo');
@@ -31,7 +31,7 @@ function generateHeader(renderedComponents) {
   return headerTemplate({
     url: logoUrl,
     description: logoDescription,
-    tagline: logoTagline,
+    tagline: headerTagline,
   });
 }
 
@@ -124,7 +124,7 @@ function generatePages(renderedComponents) {
         logo: page.header.logo,
         logoUrl: page.header.logo.url,
         logoDescription: page.header.logoDescription,
-        logTagline: page.header.tagline,
+        headerTagline: page.header.tagline,
       });
     }
 
@@ -175,7 +175,7 @@ async function processOrg(orgId) {
     logo: orgData.defaultHeader.logo,
     logoUrl: orgData.defaultHeader.logo.url,
     logoDescription: orgData.defaultHeader.logoDescription,
-    logTagline: orgData.defaultHeader.tagline,
+    headerTagline: orgData.defaultHeader.tagline,
   });
 
   orgData.defaultFooter.html = footerTemplate({ contact: orgData.defaultFooter.email });
