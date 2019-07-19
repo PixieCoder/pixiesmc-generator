@@ -1,9 +1,8 @@
 <footer>
-        <div>
-                <%= town %>
-                <%= address %>
-            </div>
-    <a href="mailto:<%= email %>" class="email"><%= email %></a>
-    <!--Link through phone number?-->
-    <a><%= phone %></a>
+        <ul class="contactInfo">
+                <li><div><%= address %></div></li>
+                <li><div><%= town %></div></li>
+                <li><a href="mailto:<%= email %>" class="contactlink"><%= email %></a></li>
+                <li><a href="tel:+<%= phone %>" class="contactlink"><%= phone %></a></li>
+        </ul>
 </footer>

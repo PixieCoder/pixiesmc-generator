@@ -20,9 +20,10 @@ section {
     margin-right: 10px;
 }
 
-.section-text {
+.contactInfo {
+    list-style-type: none;
 }
 
-.email {
+.contactlink {
     color: aqua;
 }
