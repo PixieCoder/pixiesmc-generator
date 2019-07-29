@@ -16,6 +16,7 @@ const queries = {
         name
         title
         theme
+        defaultLang
         defaultHeaders{
           tagline
           color
@@ -39,6 +40,7 @@ const queries = {
     query getPages($orgId: ID!) {
       allPages(filter: {org: {id: $orgId}}) {
         link
+        lang
         id
         org{
           id

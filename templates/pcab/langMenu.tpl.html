@@ -1,0 +1,6 @@
+<ul>
+    <li><a href="<%= root %>/"><%= defaultLang %></a></li>
+    <% _.forEach(langs, (lang) => { %>
+        <li><a href="<%= root %>/<%= lang %>/"><%= lang %></a></li>
+    <% }); %>
+</ul>
