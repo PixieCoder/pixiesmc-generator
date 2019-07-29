@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title><%= title %></title>
+    </head>
+    <body>
+        <%= header.html %>
+        <main>
+            <section class="intro">
+                    <h1><%= title %></h1>
+                    <%= imageHtml %>
+            </section>
+            <%= preambleHtml %>
+            
+            <% _.forEach(sectionsHtml, (section) => { %>
+                <%= section %>
+            <% }); %>
+            
+            <%= conclusionHtml %>
+            
+        </main>
+        <%= footer.html %>
+    </body>
+</html>
