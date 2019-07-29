@@ -1,7 +1,7 @@
 import { template } from 'lodash';
 import fs from 'fs';
 import { getData } from './data';
-import { deleteFolderRecursive, copyFolderContentsRecursive } from './utils';
+import { deleteFolderRecursive, copyFolderContentsRecursive, saveImage } from './utils';
 
 function createDistFolder(name) {
   const distName = `./dist/${name}`;
@@ -19,44 +19,55 @@ function importAssets(name, theme) {
 function generateHeader(components) {
   const {
     theme,
+    orgName,
     logo,
-    logoUrl,
     logoDescription,
     headerTagline,
   } = components;
+
   const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
   if (!logo) {
     throw new Error('Header must have logo');
   }
+  saveImage(`./dist/${orgName}/img/`, logo.name, logo.url);
   return headerTemplate({
-    url: logoUrl,
+    logo,
     description: logoDescription,
     tagline: headerTagline,
   });
 }
 
-function generateSections(theme, sections, imageOutput) {
+async function generateSections(renderedComponents) {
+  const {
+    theme,
+    sections,
+    imageOut,
+    name,
+  } = renderedComponents;
+
   const retArray = [];
+  const saveImageArray = [];
   const sectionTemplate = template(fs.readFileSync(`./templates/${theme}/section.tpl.html`, 'utf8'));
 
   for (let i = 0; i < sections.length; i += 1) {
     const section = sections[i];
 
     if (section.image) {
-      const image = imageOutput.find((element) => {
+      const image = imageOut.find((element) => {
         if (element.id === section.image.id) {
           return true;
         }
         return false;
       });
-
       section.imageHtml = image.html;
+      saveImageArray.push(saveImage(`./dist/${name}/img/`, image.file.name, image.file.url));
     } else {
       section.imageHtml = '';
     }
 
     retArray.push({ html: sectionTemplate(section), id: section.id });
   }
+  await Promise.all(saveImageArray);
   return retArray;
 }
 
@@ -66,21 +77,23 @@ function generateImages(theme, images) {
 
   for (let i = 0; i < images.length; i += 1) {
     const image = images[i];
-    retArray.push({ html: imageTemplate(image), id: image.id });
+    retArray.push({ html: imageTemplate(image), id: image.id, file: image.file });
   }
   return retArray;
 }
 
-function generatePages(renderedComponents) {
+async function generatePages(renderedComponents) {
   const {
     theme,
     pages,
     defaultHeader,
     defaultFooter,
+    name,
     sectionOutput,
     imageOutput,
   } = renderedComponents;
   const retArray = [];
+  const saveImageArray = [];
   const footerTemplate = template(fs.readFileSync(`./templates/${theme}/footer.tpl.html`, 'utf8'));
   const preambleTemplate = template(fs.readFileSync(`./templates/${theme}/preamble.tpl.html`, 'utf8'));
   const conclusionTemplate = template(fs.readFileSync(`./templates/${theme}/conclusion.tpl.html`, 'utf8'));
@@ -100,6 +113,7 @@ function generatePages(renderedComponents) {
         throw new Error('Image not found.');
       }
       page.imageHtml = image.html;
+      saveImageArray.push(saveImage(`./dist/${name}/img/`, image.file.name, image.file.url));
     } else {
       page.imageHtml = '';
     }
@@ -121,8 +135,8 @@ function generatePages(renderedComponents) {
     } else {
       page.header.html = generateHeader({
         theme,
+        orgName: name,
         logo: page.header.logo,
-        logoUrl: page.header.logo.url,
         logoDescription: page.header.logoDescription,
         headerTagline: page.header.tagline,
       });
@@ -153,7 +167,7 @@ function generatePages(renderedComponents) {
 
     retArray.push({ link: page.link, output: pageTemplate(page) });
   }
-  //  Writes out the html file and then saves it to a txt.
+  await Promise.all(saveImageArray);
   return retArray;
 }
 
@@ -177,11 +191,12 @@ async function processOrg(orgId) {
 
   orgData.defaultHeader.html = generateHeader({
     theme: orgData.theme,
+    orgName: orgData.name,
     logo: orgData.defaultHeader.logo,
-    logoUrl: orgData.defaultHeader.logo.url,
     logoDescription: orgData.defaultHeader.logoDescription,
     headerTagline: orgData.defaultHeader.tagline,
   });
+
   orgData.defaultFooter.html = footerTemplate({
     address: orgData.defaultFooter.address,
     town: orgData.defaultFooter.town,
@@ -194,17 +209,22 @@ async function processOrg(orgId) {
 
   const imageOutput = generateImages(orgData.theme, imageData.allImages);
 
-  const sectionOutput = generateSections(orgData.theme, sectionData.allSections, imageOutput);
+  const sectionOutput = await generateSections({
+    theme: orgData.theme,
+    sections: sectionData.allSections,
+    imageOut: imageOutput,
+    name: orgData.name,
+  });
 
-  const pageOutput = generatePages({
+  const pageOutput = await generatePages({
     theme: orgData.theme,
     pages: pageData.allPages,
     defaultHeader: orgData.defaultHeader,
     defaultFooter: orgData.defaultFooter,
+    name: orgData.name,
     sectionOutput,
     imageOutput,
   });
-
   writePages(orgData.name, pageOutput);
 }
 

@@ -21,6 +21,7 @@ const queries = {
           color
           logoDescription
           logo{
+            name
             url
           }
         }
@@ -49,6 +50,7 @@ const queries = {
           logoDescription
           logo{
             url
+            name
           }
         }
         footer{
@@ -69,6 +71,7 @@ const queries = {
             id
           }
           file {
+            name
             url
           }
         }
@@ -92,6 +95,7 @@ const queries = {
     query getImages($orgId: ID!) {
       allImages (filter: {org: {id: $orgId}}) {
         file{
+          name
           url
         }
         id
