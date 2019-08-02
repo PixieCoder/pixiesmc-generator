@@ -16,7 +16,11 @@ const queries = {
         name
         title
         theme
-        defaultLang
+        defaultLang{
+          title
+          link
+          id
+        }
         defaultHeaders{
           tagline
           color
@@ -24,6 +28,9 @@ const queries = {
           logo{
             name
             url
+          }
+          lang{
+            id
           }
         }
         defaultFooters{
@@ -40,7 +47,11 @@ const queries = {
     query getPages($orgId: ID!) {
       allPages(filter: {org: {id: $orgId}}) {
         link
-        lang
+        lang{
+          title
+          link
+          id
+        }
         id
         org{
           id
@@ -53,6 +64,9 @@ const queries = {
           logo{
             url
             name
+          }
+          lang{
+            id
           }
         }
         footer{
@@ -103,6 +117,9 @@ const queries = {
         id
         caption
         description
+        lang{
+          id
+        }
       }
     }
   `,

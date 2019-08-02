@@ -30,8 +30,11 @@ function generateHeader(components) {
     logoDescription,
     headerTagline,
     langMenu,
+    lang,
+    defaultLang,
   } = components;
 
+  const webRoot = defaultLang.id === lang.id ? './' : '../';
   const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
   if (!logo) {
     throw new Error('Header must have logo');
@@ -42,6 +45,7 @@ function generateHeader(components) {
     description: logoDescription,
     tagline: headerTagline,
     langMenu,
+    webRoot,
   });
 }
 
@@ -79,12 +83,13 @@ async function generateSections(renderedComponents) {
   return retArray;
 }
 
-function generateImages(theme, images) {
+function generateImages(theme, images, defaultLang) {
   const retArray = [];
   const imageTemplate = template(fs.readFileSync(`./templates/${theme}/image.tpl.html`, 'utf8'));
 
   for (let i = 0; i < images.length; i += 1) {
     const image = images[i];
+    image.webRoot = defaultLang.id === image.lang.id ? './' : '../';
     retArray.push({ html: imageTemplate(image), id: image.id, file: image.file });
   }
   return retArray;
@@ -93,10 +98,10 @@ function generateImages(theme, images) {
 function generateLangMenu(org, pages) {
   const { defaultLang, theme } = org;
   const langs = [];
-  const root = '/';
+  const webRoot = '/';
   for (let i = 0; i < pages.length; i += 1) {
     const { lang } = pages[i];
-    if (lang !== defaultLang && !langs.find(element => element === lang)) {
+    if (lang.id !== defaultLang.id && !langs.find(element => element.id === lang.id)) {
       langs.push(lang);
     }
   }
@@ -104,7 +109,7 @@ function generateLangMenu(org, pages) {
     return '';
   }
   const langMenuTemplate = template(fs.readFileSync(`./templates/${theme}/langMenu.tpl.html`, 'utf8'));
-  return langMenuTemplate({ defaultLang, langs, root });
+  return langMenuTemplate({ defaultLang, langs, webRoot });
 }
 
 async function generatePages(renderedComponents) {
@@ -117,6 +122,7 @@ async function generatePages(renderedComponents) {
     sectionOutput,
     imageOutput,
     langMenu,
+    defaultLang,
   } = renderedComponents;
   const retArray = [];
   const saveImageArray = [];
@@ -166,6 +172,8 @@ async function generatePages(renderedComponents) {
         logoDescription: page.header.logoDescription,
         headerTagline: page.header.tagline,
         langMenu,
+        lang: page.header.lang,
+        defaultLang,
       });
     }
 
@@ -200,9 +208,9 @@ async function generatePages(renderedComponents) {
 
 function writePages(name, defaultLang, pageOutput) {
   for (let i = 0; i < pageOutput.length; i += 1) {
-    if (pageOutput[i].lang !== defaultLang) {
-      createFolder(`./dist/${name}/${pageOutput[i].lang}`);
-      fs.writeFileSync(`./dist/${name}/${pageOutput[i].lang}/${pageOutput[i].link}.html`, pageOutput[i].output);
+    if (pageOutput[i].lang.id !== defaultLang.id) {
+      createFolder(`./dist/${name}/${pageOutput[i].lang.link}`);
+      fs.writeFileSync(`./dist/${name}/${pageOutput[i].lang.link}/${pageOutput[i].link}.html`, pageOutput[i].output);
     } else {
       fs.writeFileSync(`./dist/${name}/${pageOutput[i].link}.html`, pageOutput[i].output);
     }
@@ -218,7 +226,7 @@ async function processOrg(orgId) {
 
   if (!fs.existsSync(templateFolder)) {
     return;
-    //  TODO: Temporary solution, remove in feature/vtv.
+    //  TODO: remove above line.
     throw new Error(`Template folder not found: ${templateFolder}`);
   }
 
@@ -235,36 +243,29 @@ async function processOrg(orgId) {
     logoDescription: orgData.defaultHeaders[0].logoDescription,
     headerTagline: orgData.defaultHeaders[0].tagline,
     langMenu,
+    lang: orgData.defaultHeaders[0].lang,
+    defaultLang: orgData.defaultLang,
   });
 
   if (orgData.defaultFooters.length < 1) {
     throw new Error('Missing defaultfooter');
   }
-  orgData.defaultFooters[0].html = footerTemplate({
-    address: orgData.defaultFooters[0].address,
-    town: orgData.defaultFooters[0].town,
-    email: orgData.defaultFooters[0].email,
-    phone: orgData.defaultFooters[0].phone,
-  });
+  orgData.defaultFooters[0].html = footerTemplate(orgData.defaultFooters[0]);
 
   createDistFolder(orgData.name);
   importAssets(orgData.name, orgData.theme);
 
-  const imageOutput = generateImages(orgData.theme, imageData.allImages);
+  const imageOutput = generateImages(orgData.theme, imageData.allImages, orgData.defaultLang);
 
   const sectionOutput = await generateSections({
-    theme: orgData.theme,
+    ...orgData,
     sections: sectionData.allSections,
     imageOut: imageOutput,
-    name: orgData.name,
   });
 
   const pageOutput = await generatePages({
-    theme: orgData.theme,
+    ...orgData,
     pages: pageData.allPages,
-    defaultHeaders: orgData.defaultHeaders,
-    defaultFooters: orgData.defaultFooters,
-    name: orgData.name,
     sectionOutput,
     imageOutput,
     langMenu,
