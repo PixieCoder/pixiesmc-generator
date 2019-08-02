@@ -16,7 +16,7 @@ const queries = {
         name
         title
         theme
-        defaultHeader{
+        defaultHeaders{
           tagline
           color
           logoDescription
@@ -25,7 +25,7 @@ const queries = {
             url
           }
         }
-        defaultFooter{
+        defaultFooters{
           address
           town
           email
