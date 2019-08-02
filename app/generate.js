@@ -86,8 +86,8 @@ async function generatePages(renderedComponents) {
   const {
     theme,
     pages,
-    defaultHeader,
-    defaultFooter,
+    defaultHeaders,
+    defaultFooters,
     name,
     sectionOutput,
     imageOutput,
@@ -131,7 +131,7 @@ async function generatePages(renderedComponents) {
     }
 
     if (!page.header) {
-      page.header = defaultHeader;
+      [page.header] = defaultHeaders;
     } else {
       page.header.html = generateHeader({
         theme,
@@ -143,7 +143,7 @@ async function generatePages(renderedComponents) {
     }
 
     if (!page.footer) {
-      page.footer = defaultFooter;
+      [page.footer] = defaultFooters;
     } else {
       page.footer.html = footerTemplate({
         address: page.footer.address,
@@ -179,29 +179,38 @@ function writePages(name, pageOutput) {
 
 async function processOrg(orgId) {
   const { Org: orgData } = await getData('org', orgId);
+  const templateFolder = `./templates/${orgData.theme}`;
   const pageData = await getData('pages', orgId);
   const sectionData = await getData('sections', orgId);
   const imageData = await getData('images', orgId);
 
-  if (!fs.existsSync(`./templates/${orgData.theme}`)) {
-    throw new Error('Template folder not found.');
+  if (!fs.existsSync(templateFolder)) {
+    return;
+    //  TODO: Temporary solution, remove in feature/vtv.
+    throw new Error(`Template folder not found: ${templateFolder}`);
   }
 
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
-  orgData.defaultHeader.html = generateHeader({
+  if (orgData.defaultHeaders.length < 1) {
+    throw new Error('Missing defaultheader');
+  }
+  orgData.defaultHeaders[0].html = generateHeader({
     theme: orgData.theme,
     orgName: orgData.name,
-    logo: orgData.defaultHeader.logo,
-    logoDescription: orgData.defaultHeader.logoDescription,
-    headerTagline: orgData.defaultHeader.tagline,
+    logo: orgData.defaultHeaders[0].logo,
+    logoDescription: orgData.defaultHeaders[0].logoDescription,
+    headerTagline: orgData.defaultHeaders[0].tagline,
   });
 
-  orgData.defaultFooter.html = footerTemplate({
-    address: orgData.defaultFooter.address,
-    town: orgData.defaultFooter.town,
-    email: orgData.defaultFooter.email,
-    phone: orgData.defaultFooter.phone,
+  if (orgData.defaultFooters.length < 1) {
+    throw new Error('Missing defaultfooter');
+  }
+  orgData.defaultFooters[0].html = footerTemplate({
+    address: orgData.defaultFooters[0].address,
+    town: orgData.defaultFooters[0].town,
+    email: orgData.defaultFooters[0].email,
+    phone: orgData.defaultFooters[0].phone,
   });
 
   createDistFolder(orgData.name);
@@ -219,8 +228,8 @@ async function processOrg(orgId) {
   const pageOutput = await generatePages({
     theme: orgData.theme,
     pages: pageData.allPages,
-    defaultHeader: orgData.defaultHeader,
-    defaultFooter: orgData.defaultFooter,
+    defaultHeaders: orgData.defaultHeaders,
+    defaultFooters: orgData.defaultFooters,
     name: orgData.name,
     sectionOutput,
     imageOutput,
