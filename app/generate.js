@@ -39,6 +39,7 @@ function generateHeader(components) {
   if (!logo) {
     throw new Error('Header must have logo');
   }
+
   saveImage(`./dist/${orgName}/img/`, logo.name, logo.url);
   return headerTemplate({
     logo,
@@ -90,7 +91,11 @@ function generateImages(theme, images, defaultLang) {
   for (let i = 0; i < images.length; i += 1) {
     const image = images[i];
     image.webRoot = defaultLang.id === image.lang.id ? './' : '../';
-    retArray.push({ html: imageTemplate(image), id: image.id, file: image.file });
+    retArray.push({
+      html: imageTemplate(image),
+      id: image.id,
+      file: image.file,
+    });
   }
   return retArray;
 }
@@ -223,6 +228,8 @@ async function processOrg(orgId) {
   const pageData = await getData('pages', orgId);
   const sectionData = await getData('sections', orgId);
   const imageData = await getData('images', orgId);
+
+  console.log(orgData.defaultLang.link, orgData.defaultHeaders[0].lang.link);
 
   if (!fs.existsSync(templateFolder)) {
     return;
