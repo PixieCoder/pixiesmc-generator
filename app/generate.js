@@ -229,7 +229,12 @@ async function processOrg(orgId) {
   const sectionData = await getData('sections', orgId);
   const imageData = await getData('images', orgId);
 
-  console.log(orgData.defaultLang.link, orgData.defaultHeaders[0].lang.link);
+  //  console.log(orgData.defaultLang.link, orgData.defaultHeaders[0].lang.link);
+  /*  if (orgData.defaultHeaders[1]) {
+      console.log(orgData.defaultLang.id, orgData.defaultHeaders[1].lang.id);
+    } else {
+      console.log(orgData.defaultLang.id, orgData.defaultHeaders[0].lang.id);
+    } */
 
   if (!fs.existsSync(templateFolder)) {
     return;
@@ -262,6 +267,7 @@ async function processOrg(orgId) {
   createDistFolder(orgData.name);
   importAssets(orgData.name, orgData.theme);
 
+  console.log(imageData.allImages.id);
   const imageOutput = generateImages(orgData.theme, imageData.allImages, orgData.defaultLang);
 
   const sectionOutput = await generateSections({
