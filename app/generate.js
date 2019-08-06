@@ -145,13 +145,20 @@ function generatePageMenu(org, pages) {
 
   for (let i = 0; i < langs.length; i += 1) {
     const currentLang = langs[i];
+    let menuPages = [];
 
     //  Use earlier loop to find the right pages.
 
-    retArray.push(pageMenuTemplate({
-      /* Pages using the current language. */
-      webRoot,
-    }));
+    menuPages = pages.filter(pageLang => pageLang.id === currentLang.id);
+
+    for (let j = 0; j < menuPages.length; j += 1) {
+      const currentPage = menuPages[j];
+      retArray.push(pageMenuTemplate({
+        menuPages,
+        currentPage,
+        webRoot,
+      }));
+    }
   }
 
   return retArray;
