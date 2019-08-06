@@ -126,12 +126,14 @@ function generatePageMenu(org, pages) {
 
   //  Check pages for each language in use and save it to langs[];
 
+  //  Save which pages belong to what lang here already?
   for (let i = 0; i < pages.lang; i += 1) {
     const { lang } = pages[i];
     if (!langs.find(element => element.id === lang.id)) {
       langs.push(lang);
     }
   }
+
   /*  if (pages.length === 1) {
     return '';
   } */
@@ -140,7 +142,9 @@ function generatePageMenu(org, pages) {
   //  , then put them in the return array.
 
   for (let i = 0; i < langs.length; i += 1) {
+    const currentLang = langs[i];
 
+    //  Use earlier loop to find the right pages.
 
     retArray.push(pageMenuTemplate({
       /* Pages using the current language. */
