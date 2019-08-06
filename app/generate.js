@@ -267,7 +267,7 @@ async function processOrg(orgId) {
   createDistFolder(orgData.name);
   importAssets(orgData.name, orgData.theme);
 
-  console.log(imageData.allImages.id);
+  //  console.log(imageData.allImages.id);
   const imageOutput = generateImages(orgData.theme, imageData.allImages, orgData.defaultLang);
 
   const sectionOutput = await generateSections({
