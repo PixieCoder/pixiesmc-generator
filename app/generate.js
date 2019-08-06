@@ -183,7 +183,7 @@ async function generatePages(renderedComponents) {
     }
 
     if (!page.footer) {
-      [page.footer] = defaultFooters;
+      page.footer = defaultFooters.find(footer => footer.lang.id === page.lang.id);
     } else {
       page.footer.html = footerTemplate({
         address: page.footer.address,
@@ -257,7 +257,9 @@ async function processOrg(orgId) {
   if (orgData.defaultFooters.length < 1) {
     throw new Error('Missing defaultfooter');
   }
-  orgData.defaultFooters[0].html = footerTemplate(orgData.defaultFooters[0]);
+  for (let i = 0; i < orgData.defaultFooters.length; i += 1) {
+    orgData.defaultFooters[i].html = footerTemplate(orgData.defaultFooters[i]);
+  }
 
   createDistFolder(orgData.name);
   importAssets(orgData.name, orgData.theme);

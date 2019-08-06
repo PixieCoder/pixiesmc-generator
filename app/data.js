@@ -39,6 +39,9 @@ const queries = {
           email
           phone
           color
+          lang{
+            id
+          }
         }
       }
     }
@@ -75,6 +78,9 @@ const queries = {
           email
           phone
           color
+          lang{
+            id
+          }
         }
         preamble
         sections {
