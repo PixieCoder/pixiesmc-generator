@@ -30,6 +30,7 @@ function generateHeader(components) {
     logoDescription,
     headerTagline,
     langMenu,
+    pageMenu,
     lang,
     defaultLang,
   } = components;
@@ -46,6 +47,7 @@ function generateHeader(components) {
     description: logoDescription,
     tagline: headerTagline,
     langMenu,
+    pageMenu,
     webRoot,
   });
 }
@@ -285,6 +287,7 @@ async function processOrg(orgId) {
       logoDescription: orgData.defaultHeaders[i].logoDescription,
       headerTagline: orgData.defaultHeaders[i].tagline,
       langMenu,
+      pageMenu,
       lang: orgData.defaultHeaders[i].lang,
       defaultLang: orgData.defaultLang,
     });
