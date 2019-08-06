@@ -110,7 +110,7 @@ function generateLangMenu(org, pages) {
       langs.push(lang);
     }
   }
-  if (langs.length === 0) {
+  if (langs.length <= 1) {
     return '';
   }
   const langMenuTemplate = template(fs.readFileSync(`./templates/${theme}/langMenu.tpl.html`, 'utf8'));
@@ -171,13 +171,10 @@ async function generatePages(renderedComponents) {
       page.header = defaultHeaders.find(header => header.lang.id === page.lang.id);
     } else {
       page.header.html = generateHeader({
+        ...page.header,
         theme,
         orgName: name,
-        logo: page.header.logo,
-        logoDescription: page.header.logoDescription,
-        headerTagline: page.header.tagline,
         langMenu,
-        lang: page.header.lang,
         defaultLang,
       });
     }
