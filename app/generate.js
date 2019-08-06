@@ -16,6 +16,12 @@ function importAssets(name, theme) {
   }
 }
 
+function createFolder(path) {
+  if (!fs.existsSync(path)) {
+    fs.mkdirSync(path);
+  }
+}
+
 function generateHeader(components) {
   const {
     theme,
@@ -23,17 +29,24 @@ function generateHeader(components) {
     logo,
     logoDescription,
     headerTagline,
+    langMenu,
+    lang,
+    defaultLang,
   } = components;
 
+  const webRoot = defaultLang.id === lang.id ? './' : '../';
   const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
   if (!logo) {
     throw new Error('Header must have logo');
   }
+
   saveImage(`./dist/${orgName}/img/`, logo.name, logo.url);
   return headerTemplate({
     logo,
     description: logoDescription,
     tagline: headerTagline,
+    langMenu,
+    webRoot,
   });
 }
 
@@ -71,15 +84,37 @@ async function generateSections(renderedComponents) {
   return retArray;
 }
 
-function generateImages(theme, images) {
+function generateImages(theme, images, defaultLang) {
   const retArray = [];
   const imageTemplate = template(fs.readFileSync(`./templates/${theme}/image.tpl.html`, 'utf8'));
 
   for (let i = 0; i < images.length; i += 1) {
     const image = images[i];
-    retArray.push({ html: imageTemplate(image), id: image.id, file: image.file });
+    image.webRoot = defaultLang.id === image.lang.id ? './' : '../';
+    retArray.push({
+      html: imageTemplate(image),
+      id: image.id,
+      file: image.file,
+    });
   }
   return retArray;
+}
+
+function generateLangMenu(org, pages) {
+  const { defaultLang, theme } = org;
+  const langs = [];
+  const webRoot = '/';
+  for (let i = 0; i < pages.length; i += 1) {
+    const { lang } = pages[i];
+    if (lang.id !== defaultLang.id && !langs.find(element => element.id === lang.id)) {
+      langs.push(lang);
+    }
+  }
+  if (langs.length <= 1) {
+    return '';
+  }
+  const langMenuTemplate = template(fs.readFileSync(`./templates/${theme}/langMenu.tpl.html`, 'utf8'));
+  return langMenuTemplate({ defaultLang, langs, webRoot });
 }
 
 async function generatePages(renderedComponents) {
@@ -91,6 +126,8 @@ async function generatePages(renderedComponents) {
     name,
     sectionOutput,
     imageOutput,
+    langMenu,
+    defaultLang,
   } = renderedComponents;
   const retArray = [];
   const saveImageArray = [];
@@ -131,19 +168,19 @@ async function generatePages(renderedComponents) {
     }
 
     if (!page.header) {
-      [page.header] = defaultHeaders;
+      page.header = defaultHeaders.find(header => header.lang.id === page.lang.id);
     } else {
       page.header.html = generateHeader({
+        ...page.header,
         theme,
         orgName: name,
-        logo: page.header.logo,
-        logoDescription: page.header.logoDescription,
-        headerTagline: page.header.tagline,
+        langMenu,
+        defaultLang,
       });
     }
 
     if (!page.footer) {
-      [page.footer] = defaultFooters;
+      page.footer = defaultFooters.find(footer => footer.lang.id === page.lang.id);
     } else {
       page.footer.html = footerTemplate({
         address: page.footer.address,
@@ -165,15 +202,20 @@ async function generatePages(renderedComponents) {
       page.sectionsHtml.push(section.html);
     }
 
-    retArray.push({ link: page.link, output: pageTemplate(page) });
+    retArray.push({ link: page.link, output: pageTemplate(page), lang: page.lang });
   }
   await Promise.all(saveImageArray);
   return retArray;
 }
 
-function writePages(name, pageOutput) {
+function writePages(name, defaultLang, pageOutput) {
   for (let i = 0; i < pageOutput.length; i += 1) {
-    fs.writeFileSync(`./dist/${name}/${pageOutput[i].link}.html`, pageOutput[i].output);
+    if (pageOutput[i].lang.id !== defaultLang.id) {
+      createFolder(`./dist/${name}/${pageOutput[i].lang.link}`);
+      fs.writeFileSync(`./dist/${name}/${pageOutput[i].lang.link}/${pageOutput[i].link}.html`, pageOutput[i].output);
+    } else {
+      fs.writeFileSync(`./dist/${name}/${pageOutput[i].link}.html`, pageOutput[i].output);
+    }
   }
 }
 
@@ -186,55 +228,56 @@ async function processOrg(orgId) {
 
   if (!fs.existsSync(templateFolder)) {
     return;
-    //  TODO: Temporary solution, remove in feature/vtv.
+    //  TODO: remove above line.
     throw new Error(`Template folder not found: ${templateFolder}`);
   }
 
+  const langMenu = generateLangMenu(orgData, pageData.allPages);
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
   if (orgData.defaultHeaders.length < 1) {
     throw new Error('Missing defaultheader');
   }
-  orgData.defaultHeaders[0].html = generateHeader({
-    theme: orgData.theme,
-    orgName: orgData.name,
-    logo: orgData.defaultHeaders[0].logo,
-    logoDescription: orgData.defaultHeaders[0].logoDescription,
-    headerTagline: orgData.defaultHeaders[0].tagline,
-  });
+  for (let i = 0; i < orgData.defaultHeaders.length; i += 1) {
+    orgData.defaultHeaders[i].html = generateHeader({
+      theme: orgData.theme,
+      orgName: orgData.name,
+      logo: orgData.defaultHeaders[i].logo,
+      logoDescription: orgData.defaultHeaders[i].logoDescription,
+      headerTagline: orgData.defaultHeaders[i].tagline,
+      langMenu,
+      lang: orgData.defaultHeaders[i].lang,
+      defaultLang: orgData.defaultLang,
+    });
+  }
 
   if (orgData.defaultFooters.length < 1) {
     throw new Error('Missing defaultfooter');
   }
-  orgData.defaultFooters[0].html = footerTemplate({
-    address: orgData.defaultFooters[0].address,
-    town: orgData.defaultFooters[0].town,
-    email: orgData.defaultFooters[0].email,
-    phone: orgData.defaultFooters[0].phone,
-  });
+  for (let i = 0; i < orgData.defaultFooters.length; i += 1) {
+    orgData.defaultFooters[i].html = footerTemplate(orgData.defaultFooters[i]);
+  }
 
   createDistFolder(orgData.name);
   importAssets(orgData.name, orgData.theme);
 
-  const imageOutput = generateImages(orgData.theme, imageData.allImages);
+  const imageOutput = generateImages(orgData.theme, imageData.allImages, orgData.defaultLang);
 
   const sectionOutput = await generateSections({
-    theme: orgData.theme,
+    ...orgData,
     sections: sectionData.allSections,
     imageOut: imageOutput,
-    name: orgData.name,
   });
 
   const pageOutput = await generatePages({
-    theme: orgData.theme,
+    ...orgData,
     pages: pageData.allPages,
-    defaultHeaders: orgData.defaultHeaders,
-    defaultFooters: orgData.defaultFooters,
-    name: orgData.name,
     sectionOutput,
     imageOutput,
+    langMenu,
   });
-  writePages(orgData.name, pageOutput);
+
+  writePages(orgData.name, orgData.defaultLang, pageOutput);
 }
 
 export default async function generate() {

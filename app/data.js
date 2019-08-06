@@ -16,6 +16,11 @@ const queries = {
         name
         title
         theme
+        defaultLang{
+          title
+          link
+          id
+        }
         defaultHeaders{
           tagline
           color
@@ -24,6 +29,9 @@ const queries = {
             name
             url
           }
+          lang{
+            id
+          }
         }
         defaultFooters{
           address
@@ -31,6 +39,9 @@ const queries = {
           email
           phone
           color
+          lang{
+            id
+          }
         }
       }
     }
@@ -39,6 +50,11 @@ const queries = {
     query getPages($orgId: ID!) {
       allPages(filter: {org: {id: $orgId}}) {
         link
+        lang{
+          title
+          link
+          id
+        }
         id
         org{
           id
@@ -52,6 +68,9 @@ const queries = {
             url
             name
           }
+          lang{
+            id
+          }
         }
         footer{
           address
@@ -59,6 +78,9 @@ const queries = {
           email
           phone
           color
+          lang{
+            id
+          }
         }
         preamble
         sections {
@@ -101,6 +123,9 @@ const queries = {
         id
         caption
         description
+        lang{
+          id
+        }
       }
     }
   `,
