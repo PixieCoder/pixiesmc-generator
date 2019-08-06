@@ -117,6 +117,40 @@ function generateLangMenu(org, pages) {
   return langMenuTemplate({ defaultLang, langs, webRoot });
 }
 
+function generatePageMenu(org, pages) {
+  const { theme } = org;
+  const retArray = [];
+  const langs = [];
+  const webRoot = '/';
+  const pageMenuTemplate = template(fs.readFileSync(`./templates/${theme}/pageMenu.tpl.html`, 'utf8'));
+
+  //  Check pages for each language in use and save it to langs[];
+
+  for (let i = 0; i < pages.lang; i += 1) {
+    const { lang } = pages[i];
+    if (!langs.find(element => element.id === lang.id)) {
+      langs.push(lang);
+    }
+  }
+  /*  if (pages.length === 1) {
+    return '';
+  } */
+
+  //  Take all pages of each language and run them through the pageMenuTemplate
+  //  , then put them in the return array.
+
+  for (let i = 0; i < langs.length; i += 1) {
+
+
+    retArray.push(pageMenuTemplate({
+      /* Pages using the current language. */
+      webRoot,
+    }));
+  }
+
+  return retArray;
+}
+
 async function generatePages(renderedComponents) {
   const {
     theme,
@@ -233,6 +267,7 @@ async function processOrg(orgId) {
   }
 
   const langMenu = generateLangMenu(orgData, pageData.allPages);
+  const pageMenu = generatePageMenu(orgData, pageData.allPages);
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
   if (orgData.defaultHeaders.length < 1) {
