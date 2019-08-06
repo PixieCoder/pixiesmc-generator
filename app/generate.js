@@ -168,7 +168,7 @@ async function generatePages(renderedComponents) {
     }
 
     if (!page.header) {
-      [page.header] = defaultHeaders;
+      page.header = defaultHeaders.find(header => header.lang.id === page.lang.id);
     } else {
       page.header.html = generateHeader({
         theme,
@@ -229,13 +229,6 @@ async function processOrg(orgId) {
   const sectionData = await getData('sections', orgId);
   const imageData = await getData('images', orgId);
 
-  //  console.log(orgData.defaultLang.link, orgData.defaultHeaders[0].lang.link);
-  /*  if (orgData.defaultHeaders[1]) {
-      console.log(orgData.defaultLang.id, orgData.defaultHeaders[1].lang.id);
-    } else {
-      console.log(orgData.defaultLang.id, orgData.defaultHeaders[0].lang.id);
-    } */
-
   if (!fs.existsSync(templateFolder)) {
     return;
     //  TODO: remove above line.
@@ -248,16 +241,18 @@ async function processOrg(orgId) {
   if (orgData.defaultHeaders.length < 1) {
     throw new Error('Missing defaultheader');
   }
-  orgData.defaultHeaders[0].html = generateHeader({
-    theme: orgData.theme,
-    orgName: orgData.name,
-    logo: orgData.defaultHeaders[0].logo,
-    logoDescription: orgData.defaultHeaders[0].logoDescription,
-    headerTagline: orgData.defaultHeaders[0].tagline,
-    langMenu,
-    lang: orgData.defaultHeaders[0].lang,
-    defaultLang: orgData.defaultLang,
-  });
+  for (let i = 0; i < orgData.defaultHeaders.length; i += 1) {
+    orgData.defaultHeaders[i].html = generateHeader({
+      theme: orgData.theme,
+      orgName: orgData.name,
+      logo: orgData.defaultHeaders[i].logo,
+      logoDescription: orgData.defaultHeaders[i].logoDescription,
+      headerTagline: orgData.defaultHeaders[i].tagline,
+      langMenu,
+      lang: orgData.defaultHeaders[i].lang,
+      defaultLang: orgData.defaultLang,
+    });
+  }
 
   if (orgData.defaultFooters.length < 1) {
     throw new Error('Missing defaultfooter');
@@ -267,7 +262,6 @@ async function processOrg(orgId) {
   createDistFolder(orgData.name);
   importAssets(orgData.name, orgData.theme);
 
-  //  console.log(imageData.allImages.id);
   const imageOutput = generateImages(orgData.theme, imageData.allImages, orgData.defaultLang);
 
   const sectionOutput = await generateSections({
