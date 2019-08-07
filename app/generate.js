@@ -2,7 +2,6 @@ import { template } from 'lodash';
 import fs from 'fs';
 import { getData } from './data';
 import { deleteFolderRecursive, copyFolderContentsRecursive, saveImage } from './utils';
-import { NONAME } from 'dns';
 
 function createDistFolder(name) {
   const distName = `./dist/${name}`;
@@ -35,12 +34,14 @@ function generateHeader(components) {
     lang,
     defaultLang,
   } = components;
+
   const webRoot = defaultLang.id === lang.id ? './' : '../';
   const pageMenu = pageMenus.find(menu => menu.id === lang.id) || '';
   const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
   if (!logo) {
     throw new Error('Header must have logo');
   }
+
   saveImage(`./dist/${orgName}/img/`, logo.name, logo.url);
   return headerTemplate({
     logo,
