@@ -137,9 +137,7 @@ function generatePageMenus(org, pages) {
   for (let i = 0; i < langs.length; i += 1) {
     const currentLang = langs[i];
     const webRoot = org.defaultLang.id === currentLang.id ? '/' : `/${currentLang.link}/`;
-    let menuPages = [];
-
-    menuPages = pages.filter(page => page.lang.id === currentLang.id && page.menuStatus !== 'None');
+    const menuPages = pages.filter(page => page.lang.id === currentLang.id && page.menuStatus !== 'None');
 
     if (menuPages.length > 1) {
       retArray.push({
