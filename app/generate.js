@@ -2,6 +2,7 @@ import { template } from 'lodash';
 import fs from 'fs';
 import { getData } from './data';
 import { deleteFolderRecursive, copyFolderContentsRecursive, saveImage } from './utils';
+import { NONAME } from 'dns';
 
 function createDistFolder(name) {
   const distName = `./dist/${name}`;
@@ -137,7 +138,7 @@ function generatePageMenus(org, pages) {
     const webRoot = org.defaultLang.id === currentLang.id ? '/' : `/${currentLang.link}/`;
     let menuPages = [];
 
-    menuPages = pages.filter(page => page.lang.id === currentLang.id);
+    menuPages = pages.filter(page => page.lang.id === currentLang.id && page.menuStatus !== 'None');
 
     if (menuPages.length > 1) {
       retArray.push({
