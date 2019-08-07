@@ -30,15 +30,23 @@ function generateHeader(components) {
     logoDescription,
     headerTagline,
     langMenu,
-    pageMenu,
+    pageMenus,
     lang,
     defaultLang,
   } = components;
-
+  // Sometimes pageMenus is null, in that case there should be no menu.
+  let pageMenu;
   const webRoot = defaultLang.id === lang.id ? './' : '../';
   const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
   if (!logo) {
     throw new Error('Header must have logo');
+  }
+  console.log(pageMenus);
+  process.exit();
+  if (pageMenus.find(menu => menu.id === lang.id)) {
+    pageMenu = pageMenus.find(menu => menu.id === lang.id);
+  } else {
+    pageMenu = '';
   }
 
   saveImage(`./dist/${orgName}/img/`, logo.name, logo.url);
@@ -113,57 +121,42 @@ function generateLangMenu(org, pages) {
     }
   }
 
-  /*if (langs.length <= 1) {
+  if (langs.length < 1) { //  defaultLang is not in langs array.
     return '';
-  }*/
+  }
   const langMenuTemplate = template(fs.readFileSync(`./templates/${theme}/langMenu.tpl.html`, 'utf8'));
   return langMenuTemplate({ defaultLang, langs, webRoot });
 }
 
-function generatePageMenu(org, pages) {
+function generatePageMenus(org, pages) {
   const { theme } = org;
   const retArray = [];
   const langs = [];
-  const webRoot = '/';
   const pageMenuTemplate = template(fs.readFileSync(`./templates/${theme}/pageMenu.tpl.html`, 'utf8'));
 
   //  Save which pages belong to what lang here already?
-  for (let i = 0; i < pages.lang; i += 1) {
+  for (let i = 0; i < pages.length; i += 1) {
     const { lang } = pages[i];
     if (!langs.find(element => element.id === lang.id)) {
       langs.push(lang);
     }
   }
 
-  /*  if (pages.length === 1) {
-    return '';
-  } */
-
-  //  Take all pages of each language and run them through the pageMenuTemplate
-  //  , then put them in the return array.
-
   for (let i = 0; i < langs.length; i += 1) {
     const currentLang = langs[i];
+    const webRoot = org.defaultLang.id === currentLang.id ? '/' : `/${currentLang.link}/`;
     let menuPages = [];
 
-    //  Use earlier loop to find the right pages.
+    menuPages = pages.filter(page => page.lang.id === currentLang.id);
 
-    menuPages = pages.filter(pageLang => pageLang.id === currentLang.id);
-
-    for (let j = 0; j < menuPages.length; j += 1) {
-      const currentPage = menuPages[j];
-
-      console.log(pageMenuTemplate({
-        menuPages,
-        currentPage,
-        webRoot,
-      }));
-
-      retArray.push(pageMenuTemplate({
-        menuPages,
-        currentPage,
-        webRoot,
-      }));
+    if (menuPages.length > 1) {
+      retArray.push({
+        ...currentLang,
+        html: pageMenuTemplate({
+          menuPages,
+          webRoot,
+        }),
+      });
     }
   }
   return retArray;
@@ -179,6 +172,7 @@ async function generatePages(renderedComponents) {
     sectionOutput,
     imageOutput,
     langMenu,
+    pageMenus,
     defaultLang,
   } = renderedComponents;
   const retArray = [];
@@ -227,6 +221,7 @@ async function generatePages(renderedComponents) {
         theme,
         orgName: name,
         langMenu,
+        pageMenus,
         defaultLang,
       });
     }
@@ -285,9 +280,9 @@ async function processOrg(orgId) {
   }
 
   const langMenu = generateLangMenu(orgData, pageData.allPages);
-  const pageMenu = generatePageMenu(orgData, pageData.allPages);
+  const pageMenus = generatePageMenus(orgData, pageData.allPages);
   //  No output from langMenu and pageMenu
-  console.log(langMenu, ', ', pageMenu);
+  //  console.log(langMenu, ', ', pageMenu);
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
   if (orgData.defaultHeaders.length < 1) {
@@ -301,7 +296,7 @@ async function processOrg(orgId) {
       logoDescription: orgData.defaultHeaders[i].logoDescription,
       headerTagline: orgData.defaultHeaders[i].tagline,
       langMenu,
-      pageMenu,
+      pageMenus,
       lang: orgData.defaultHeaders[i].lang,
       defaultLang: orgData.defaultLang,
     });
