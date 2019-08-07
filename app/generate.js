@@ -112,9 +112,10 @@ function generateLangMenu(org, pages) {
       langs.push(lang);
     }
   }
-  if (langs.length <= 1) {
+
+  /*if (langs.length <= 1) {
     return '';
-  }
+  }*/
   const langMenuTemplate = template(fs.readFileSync(`./templates/${theme}/langMenu.tpl.html`, 'utf8'));
   return langMenuTemplate({ defaultLang, langs, webRoot });
 }
@@ -125,8 +126,6 @@ function generatePageMenu(org, pages) {
   const langs = [];
   const webRoot = '/';
   const pageMenuTemplate = template(fs.readFileSync(`./templates/${theme}/pageMenu.tpl.html`, 'utf8'));
-
-  //  Check pages for each language in use and save it to langs[];
 
   //  Save which pages belong to what lang here already?
   for (let i = 0; i < pages.lang; i += 1) {
@@ -153,6 +152,13 @@ function generatePageMenu(org, pages) {
 
     for (let j = 0; j < menuPages.length; j += 1) {
       const currentPage = menuPages[j];
+
+      console.log(pageMenuTemplate({
+        menuPages,
+        currentPage,
+        webRoot,
+      }));
+
       retArray.push(pageMenuTemplate({
         menuPages,
         currentPage,
@@ -160,7 +166,6 @@ function generatePageMenu(org, pages) {
       }));
     }
   }
-
   return retArray;
 }
 
@@ -281,6 +286,8 @@ async function processOrg(orgId) {
 
   const langMenu = generateLangMenu(orgData, pageData.allPages);
   const pageMenu = generatePageMenu(orgData, pageData.allPages);
+  //  No output from langMenu and pageMenu
+  console.log(langMenu, ', ', pageMenu);
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
   if (orgData.defaultHeaders.length < 1) {
