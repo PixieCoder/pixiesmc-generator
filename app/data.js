@@ -55,6 +55,7 @@ const queries = {
           link
           id
         }
+        menuStatus
         id
         org{
           id

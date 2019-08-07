@@ -30,11 +30,13 @@ function generateHeader(components) {
     logoDescription,
     headerTagline,
     langMenu,
+    pageMenus,
     lang,
     defaultLang,
   } = components;
 
   const webRoot = defaultLang.id === lang.id ? './' : '../';
+  const pageMenu = pageMenus.find(menu => menu.id === lang.id) || '';
   const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
   if (!logo) {
     throw new Error('Header must have logo');
@@ -46,6 +48,7 @@ function generateHeader(components) {
     description: logoDescription,
     tagline: headerTagline,
     langMenu,
+    pageMenu,
     webRoot,
   });
 }
@@ -110,11 +113,43 @@ function generateLangMenu(org, pages) {
       langs.push(lang);
     }
   }
-  if (langs.length <= 1) {
+
+  if (langs.length < 1) { //  defaultLang is not in langs array.
     return '';
   }
   const langMenuTemplate = template(fs.readFileSync(`./templates/${theme}/langMenu.tpl.html`, 'utf8'));
   return langMenuTemplate({ defaultLang, langs, webRoot });
+}
+
+function generatePageMenus(org, pages) {
+  const { theme } = org;
+  const retArray = [];
+  const langs = [];
+  const pageMenuTemplate = template(fs.readFileSync(`./templates/${theme}/pageMenu.tpl.html`, 'utf8'));
+
+  for (let i = 0; i < pages.length; i += 1) {
+    const { lang } = pages[i];
+    if (!langs.find(element => element.id === lang.id)) {
+      langs.push(lang);
+    }
+  }
+
+  for (let i = 0; i < langs.length; i += 1) {
+    const currentLang = langs[i];
+    const webRoot = org.defaultLang.id === currentLang.id ? '/' : `/${currentLang.link}/`;
+    const menuPages = pages.filter(page => page.lang.id === currentLang.id && page.menuStatus !== 'None');
+
+    if (menuPages.length > 1) {
+      retArray.push({
+        ...currentLang,
+        html: pageMenuTemplate({
+          menuPages,
+          webRoot,
+        }),
+      });
+    }
+  }
+  return retArray;
 }
 
 async function generatePages(renderedComponents) {
@@ -127,6 +162,7 @@ async function generatePages(renderedComponents) {
     sectionOutput,
     imageOutput,
     langMenu,
+    pageMenus,
     defaultLang,
   } = renderedComponents;
   const retArray = [];
@@ -175,6 +211,7 @@ async function generatePages(renderedComponents) {
         theme,
         orgName: name,
         langMenu,
+        pageMenus,
         defaultLang,
       });
     }
@@ -233,6 +270,7 @@ async function processOrg(orgId) {
   }
 
   const langMenu = generateLangMenu(orgData, pageData.allPages);
+  const pageMenus = generatePageMenus(orgData, pageData.allPages);
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
   if (orgData.defaultHeaders.length < 1) {
@@ -246,6 +284,7 @@ async function processOrg(orgId) {
       logoDescription: orgData.defaultHeaders[i].logoDescription,
       headerTagline: orgData.defaultHeaders[i].tagline,
       langMenu,
+      pageMenus,
       lang: orgData.defaultHeaders[i].lang,
       defaultLang: orgData.defaultLang,
     });
@@ -275,6 +314,7 @@ async function processOrg(orgId) {
     sectionOutput,
     imageOutput,
     langMenu,
+    pageMenus,
   });
 
   writePages(orgData.name, orgData.defaultLang, pageOutput);
