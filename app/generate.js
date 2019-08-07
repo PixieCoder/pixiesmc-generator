@@ -34,21 +34,12 @@ function generateHeader(components) {
     lang,
     defaultLang,
   } = components;
-  // Sometimes pageMenus is null, in that case there should be no menu.
-  let pageMenu;
   const webRoot = defaultLang.id === lang.id ? './' : '../';
+  const pageMenu = pageMenus.find(menu => menu.id === lang.id) || '';
   const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
   if (!logo) {
     throw new Error('Header must have logo');
   }
-  console.log(pageMenus);
-  process.exit();
-  if (pageMenus.find(menu => menu.id === lang.id)) {
-    pageMenu = pageMenus.find(menu => menu.id === lang.id);
-  } else {
-    pageMenu = '';
-  }
-
   saveImage(`./dist/${orgName}/img/`, logo.name, logo.url);
   return headerTemplate({
     logo,
@@ -134,7 +125,6 @@ function generatePageMenus(org, pages) {
   const langs = [];
   const pageMenuTemplate = template(fs.readFileSync(`./templates/${theme}/pageMenu.tpl.html`, 'utf8'));
 
-  //  Save which pages belong to what lang here already?
   for (let i = 0; i < pages.length; i += 1) {
     const { lang } = pages[i];
     if (!langs.find(element => element.id === lang.id)) {
@@ -281,8 +271,6 @@ async function processOrg(orgId) {
 
   const langMenu = generateLangMenu(orgData, pageData.allPages);
   const pageMenus = generatePageMenus(orgData, pageData.allPages);
-  //  No output from langMenu and pageMenu
-  //  console.log(langMenu, ', ', pageMenu);
   const footerTemplate = template(fs.readFileSync(`./templates/${orgData.theme}/footer.tpl.html`, 'utf8'));
 
   if (orgData.defaultHeaders.length < 1) {
@@ -326,6 +314,7 @@ async function processOrg(orgId) {
     sectionOutput,
     imageOutput,
     langMenu,
+    pageMenus,
   });
 
   writePages(orgData.name, orgData.defaultLang, pageOutput);
