@@ -264,8 +264,6 @@ async function processOrg(orgId) {
   const imageData = await getData('images', orgId);
 
   if (!fs.existsSync(templateFolder)) {
-    return;
-    //  TODO: remove above line.
     throw new Error(`Template folder not found: ${templateFolder}`);
   }
 
