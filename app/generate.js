@@ -38,6 +38,7 @@ function generateHeader(components) {
   const webRoot = defaultLang.id === lang.id ? './' : '../';
   const pageMenu = pageMenus.find(menu => menu.id === lang.id) || '';
   const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
+
   if (!logo) {
     throw new Error('Header must have logo');
   }
@@ -100,6 +101,7 @@ function generateImages(theme, images, defaultLang) {
       file: image.file,
     });
   }
+
   return retArray;
 }
 
@@ -228,7 +230,8 @@ async function generatePages(renderedComponents) {
     }
 
     page.sectionsHtml = [];
-
+    console.log('f');
+    //  TypeError: Cannot read property 'html' of undefined
     for (let j = 0; j < page.sections.length; j += 1) {
       const section = sectionOutput.find((element) => {
         if (element.id === page.sections[j].id) {
