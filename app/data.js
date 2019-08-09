@@ -59,6 +59,7 @@ const queries = {
         id
         org{
           id
+          title
         }
         title
         header{
