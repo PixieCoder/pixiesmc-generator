@@ -177,6 +177,7 @@ async function generatePages(renderedComponents) {
 
   for (let i = 0; i < pages.length; i += 1) {
     const page = pages[i];
+    page.webRoot = defaultLang.id === page.lang.id ? './' : '../';
 
     if (page.image) {
       const image = imageOutput.find((element) => {
