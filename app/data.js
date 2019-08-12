@@ -39,6 +39,8 @@ const queries = {
           email
           phone
           color
+          footerText
+          copyright
           lang{
             id
           }

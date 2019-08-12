@@ -1,6 +1,6 @@
-<ul>
-    <li><a href="<%= webRoot %>"><%= defaultLang.title %></a></li>
+<ul class="header--language-menu">
+    <li class="header--language-menu__item current"><a href="<%= webRoot %>"><%= defaultLang.title %></a></li>
     <% _.forEach(langs, (lang) => { %>
-        <li><a href="<%= webRoot %><%= lang.link %>/"><%= lang.title %></a></li>
+        <li class="header--language-menu__item current"><a href="<%= webRoot %><%= lang.link %>/"><%= lang.title %></a></li>
     <% }); %>
 </ul>
