@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+    <head>
+        <link href="<%= webRoot %>css\vtv.css" type="text/css" rel="stylesheet">
+        <meta charset="utf-8"/>
+        <title><%= title %></title>
+    </head>
+    <body>
+        <%= header.html %>
+        <main class="main">
+            <section class="intro">
+                <h1 class="main--page-title"><%= title %></h1>
+                    <%= imageHtml %>
+            </section>
+            <%= preambleHtml %>
+            
+            <% _.forEach(sectionsHtml, (section) => { %>
+                <%= section %>
+            <% }); %>
+            
+            <%= conclusionHtml %>
+            
+        </main>
+        <%= footer.html %>
+    </body>
+</html>

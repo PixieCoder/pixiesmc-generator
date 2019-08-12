@@ -39,6 +39,8 @@ const queries = {
           email
           phone
           color
+          footerText
+          copyright
           lang{
             id
           }
@@ -59,6 +61,7 @@ const queries = {
         id
         org{
           id
+          title
         }
         title
         header{

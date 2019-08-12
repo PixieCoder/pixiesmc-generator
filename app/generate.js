@@ -38,6 +38,7 @@ function generateHeader(components) {
   const webRoot = defaultLang.id === lang.id ? './' : '../';
   const pageMenu = pageMenus.find(menu => menu.id === lang.id) || '';
   const headerTemplate = template(fs.readFileSync(`./templates/${theme}/header.tpl.html`, 'utf8'));
+
   if (!logo) {
     throw new Error('Header must have logo');
   }
@@ -76,6 +77,7 @@ async function generateSections(renderedComponents) {
         return false;
       });
       section.imageHtml = image.html;
+
       saveImageArray.push(saveImage(`./dist/${name}/img/`, image.file.name, image.file.url));
     } else {
       section.imageHtml = '';
@@ -100,6 +102,7 @@ function generateImages(theme, images, defaultLang) {
       file: image.file,
     });
   }
+
   return retArray;
 }
 
@@ -174,6 +177,7 @@ async function generatePages(renderedComponents) {
 
   for (let i = 0; i < pages.length; i += 1) {
     const page = pages[i];
+    page.webRoot = defaultLang.id === page.lang.id ? './' : '../';
 
     if (page.image) {
       const image = imageOutput.find((element) => {
@@ -186,6 +190,7 @@ async function generatePages(renderedComponents) {
         throw new Error('Image not found.');
       }
       page.imageHtml = image.html;
+
       saveImageArray.push(saveImage(`./dist/${name}/img/`, image.file.name, image.file.url));
     } else {
       page.imageHtml = '';
@@ -205,6 +210,9 @@ async function generatePages(renderedComponents) {
 
     if (!page.header) {
       page.header = defaultHeaders.find(header => header.lang.id === page.lang.id);
+      if (!page.header) {
+        throw new Error(`Missing defaultHeader for ${page.lang.link} on "${page.org.title}".`);
+      }
     } else {
       page.header.html = generateHeader({
         ...page.header,
@@ -218,6 +226,9 @@ async function generatePages(renderedComponents) {
 
     if (!page.footer) {
       page.footer = defaultFooters.find(footer => footer.lang.id === page.lang.id);
+      if (!page.footer) {
+        throw new Error(`Missing defaultFooter for ${page.lang.link} on "${page.org.title}".`);
+      }
     } else {
       page.footer.html = footerTemplate({
         address: page.footer.address,
@@ -228,15 +239,14 @@ async function generatePages(renderedComponents) {
     }
 
     page.sectionsHtml = [];
-
     for (let j = 0; j < page.sections.length; j += 1) {
-      const section = sectionOutput.find((element) => {
-        if (element.id === page.sections[j].id) {
-          return true;
-        }
-        return false;
-      });
-      page.sectionsHtml.push(section.html);
+      const section = sectionOutput.find(element => element.id === page.sections[j].id);
+
+      if (section) {
+        page.sectionsHtml.push(section.html);
+      } else {
+        throw new Error(`Can't find section with ID: ${page.sections[j].id}`);
+      }
     }
 
     retArray.push({ link: page.link, output: pageTemplate(page), lang: page.lang });
@@ -264,8 +274,6 @@ async function processOrg(orgId) {
   const imageData = await getData('images', orgId);
 
   if (!fs.existsSync(templateFolder)) {
-    return;
-    //  TODO: remove above line.
     throw new Error(`Template folder not found: ${templateFolder}`);
   }
 
